@@ -79,7 +79,7 @@ export async function getDataGraph(): Promise<any> {
 	return retResult;
 }
 export async function updatePosition(table: string, position: { x: number; y: number; }, id: RecordIdValue) {
-	surrealDb.merge<DataNodeRecord>(
+	surrealDb.merge(
 		new RecordId(table, id), {
 		position: position
 	});

@@ -17,6 +17,8 @@ export async function unpersistedQueryNode(nodeData, oldTableId, oldDataName) {
         return schm;
     });
     return deleteNodeRecord('data', oldTableId)
+        // @ts-ignore
+        .then(() => linkQueryToDataFile(nodeData.id, ""))
         .then(() => deleteDataTable(oldTableId, oldDataName));
 }
 /**

@@ -115,12 +115,12 @@
 					data.chartConfig = $jsText;
 				}
 			}
+			if (!persistedState || view !== DetailView.ViewTable) {
+				data.nodeView = view;
+			}
 			updateQueryFile(data);
 			if (view === DetailView.ViewTable && persistedState) {
 				location.href = '/datasets/' + data.dataId;
-			}
-			else {
-				data.nodeView = view;
 			}
 		});
 		pageUnsubscribe = page.subscribe(async (pg) => {
@@ -201,7 +201,7 @@
 						disabled={!(persistedState || dataName)}
 						size="sm"
 						class="h-8"
-						onclick={() => persistQueryAsTable()}>Persist</Button
+						onclick={() => persistQueryAsTable()}>Save state</Button
 					>
 				</div>
 			</div>

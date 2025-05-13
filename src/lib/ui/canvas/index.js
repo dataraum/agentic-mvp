@@ -124,9 +124,9 @@ export async function resetImportEdges(id, query) {
 		})
 		.then(async () => {
 			(await getTables(query)).forEach((tableId) =>
-				{console.log('tableId', tableId)
-				addEdge(tableId, id);	
-				addQueryDataEdge(tableId, id, 'import');}
+				addEdge(tableId, id).then((sourceId) =>
+					addQueryDataEdge(sourceId, id, 'import')
+				)
 			);
 		});
 }

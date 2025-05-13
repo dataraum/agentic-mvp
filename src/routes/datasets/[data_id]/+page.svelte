@@ -66,7 +66,7 @@
 		pageUnsubscribe();
 	});
 	onMount(async () => {
-		await initFusion().then(() => register_table(data.data_id, data.table_name));
+		await register_table(data.data_id, data.table_name);
 		setTotalItems();
 		pageUnsubscribe = page.subscribe(async (pg) => {
 			tablePromise = runSql(

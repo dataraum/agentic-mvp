@@ -39,7 +39,7 @@ export async function updateDataName(id: string, dataName: string) {
 }
 
 export async function updateSelectedView(id: string, viewId: number) {
-	surrealDb.merge<DataNodeRecord>(
+	surrealDb.merge(
 		new RecordId('data', id), {
 		nodeView: viewId
 	});

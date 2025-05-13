@@ -1,14 +1,23 @@
-import { RecordId } from "surrealdb";
-import { surrealDb, type InOutEdge, type QueryNodeRecord } from ".";
+import { RecordId, StringRecordId } from "surrealdb";
+import { surrealDb, type GeneralResult, type InOutEdge, type QueryNodeRecord } from ".";
 
 export async function deleteQueryToDataImport(queryId: string) {
 	const queryString = 'DELETE queries:' + queryId + '->import;';
 	surrealDb.query(queryString);
 }
 
-export async function addEdge(sourceId: string, targetId: string) {
+export async function addEdge(sourceId: string, targetId: string): Promise<string> {
+	const result = await surrealDb.query<GeneralResult[][]>(
+		'SELECT id FROM queries WHERE dataId = $sourceId;',
+		{ sourceId }
+	);
+	if (result && result[0] && result[0][0]) {
+		sourceId = result[0][0].id.id.toString();
+	}
 	const queryString = 'RELATE queries:' + sourceId + '->import->data:' + targetId + ';';
 	surrealDb.query(queryString);
+
+	return sourceId;
 }
 export async function deleteItAll() {
 	surrealDb.query('REMOVE DATABASE proto;');
@@ -31,11 +40,13 @@ export async function updateQueryFile(queryData: QueryNode) {
 	if (!queryData.id) {
 		throw new Error('Query file ID is required');
 	}
-	surrealDb.merge<QueryNodeRecord>(new RecordId('queries', queryData.id), {
-		statement: queryData.statement,
-		chartConfig: queryData.chartConfig,
-		nodeView: queryData.nodeView,
-	});
+	surrealDb.merge(
+		new RecordId('queries', queryData.id),
+		{
+			statement: queryData.statement,
+			chartConfig: queryData.chartConfig,
+			nodeView: queryData.nodeView,
+		});
 }
 
 export async function linkQueryToDataFile(queryId: string, dataId: string) {

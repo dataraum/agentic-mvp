@@ -37,16 +37,6 @@ export function addSchema(schema) {
  * @param {string} dataName
  */
 export async function registerDataTable(dataId, dataName) {
-    // console.log("registerDataTable", dataId, dataName);
-    // await register_table(dataId, dataName)
-    // console.log("registerDataTable", dataId, dataName);
-    // const schema = await get_table_schema(dataName);
-    // console.log("registerDataTable", schema);
-    // addSchema(JSON.parse(schema));
-    // return schema;
-    //     .catch((/** @type {Error} */ e) => {
-    //         setErrorView(e.message);
-    //     });
     return register_table(dataId, dataName)
         .then(() => get_table_schema(dataName))
         .then((schema) => addSchema(JSON.parse(schema)))
