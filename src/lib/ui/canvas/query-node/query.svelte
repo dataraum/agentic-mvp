@@ -11,8 +11,6 @@
 	import { deleteQueryNode, resetImportEdges } from '$lib/ui/canvas';
 	import { DetailView } from '.';
 	import QueryButtonGroup from './query-button-group.svelte';
-	import { tableToIPC } from '@apache-arrow/ts';
-	import { digestFile } from '$lib/signUtils';
 	import { schemas } from '$lib/processor/datafusion/cf-table-api';
 	import {
 		runSql,
@@ -56,20 +54,17 @@
 		// @ts-ignore
 		if (tblNameInput?.reportValidity()) {
 			if ($table && persistedState) {
-				const fileArrayBuffer = new Uint8Array(tableToIPC($table)); // encode as (utf-8) Uint8Array
-				await digestFile(fileArrayBuffer).then((digest) => {
-					if (digest === data.dataId) {
+				if (data.dataId) {
 						changePersistedQueryName(dataName, data).then(() => {
 							data.dataName = dataName;
 						});
 					} else {
-						addPersistedQuery(data.statement, digest, dataName, id).then(() => {
+						addPersistedQuery(data.statement, dataName, id).then((dataId) => {
 							data.dataName = dataName;
 							data.persisted = true;
-							data.dataId = digest;
+							data.dataId = dataId;
 						});
 					}
-				});
 			} else {
 				// delete table again
 				const oldDataName = data.dataName;

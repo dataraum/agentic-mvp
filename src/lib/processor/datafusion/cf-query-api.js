@@ -45,27 +45,28 @@ export async function changePersistedQueryName(newDataName, data) {
 }
 /**
  * @param {string} sqlStatement
- * @param {string} dataDigest
  * @param {string} dataName
  * @param {string} queryId
- * @returns {Promise<any>}
+ * @returns {Promise<string>}
  */
-export async function addPersistedQuery(sqlStatement, dataDigest, dataName, queryId) {
+export async function addPersistedQuery(sqlStatement, dataName, queryId){
     // query tables are registered under the query id and not the data digest
     const dataFile = {
-        id: dataDigest,
         dataName: dataName,
         format: 'df/ipc',
     };
-    return persist_sql(sqlStatement, dataDigest)
-        .then(() => register_table(dataDigest, dataName))
+    const result = await storeDataFile(dataFile);
+    const dataId = result.id? result.id : "";
+    
+    await persist_sql(sqlStatement, dataId)
+        .then(() => register_table(dataId, dataName))
         .then(() => get_table_schema(dataName))
         .then((schema) => addSchema(JSON.parse(schema)))
-        .then(() => storeDataFile(dataFile))
-        .then(() => linkQueryToDataFile(queryId, dataDigest))
+        .then(() => linkQueryToDataFile(queryId, dataId))
         .catch((/** @type {Error} */ e) => {
             setErrorView(e.message);
         });
+    return dataId;
 }
 /**
  *

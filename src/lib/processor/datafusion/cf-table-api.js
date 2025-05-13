@@ -25,7 +25,6 @@ export async function logDataFiles() {
  * @param {any} schema
  */
 export function addSchema(schema) {
-    console.log("addSchema", schema);
     schemas.update((schm) => {
         const dataName = Object.keys(schema)[0];
         schm[dataName] = schema[dataName];

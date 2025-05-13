@@ -15,20 +15,22 @@ export async function getDatasetData(dataId: string): Promise<DataNode> {
 	};
 }
 
-export async function storeDataFile(dataFile: DataNode) {
-	if (!dataFile.id) {
-		throw new Error('Data file ID is required');
-	}
-	const dataId = new RecordId('data', dataFile.id);
-	await surrealDb.upsert<DataNodeRecord>(
-		dataId, {
-		id: dataId,
+export async function storeDataFile(dataFile: DataNode): Promise<DataNode> {
+	const result = await surrealDb.insert<DataNodeBody>('data', {
 		format: dataFile.format,
 		dataName: dataFile.dataName,
 		size: dataFile.size,
 		nodeView: dataFile.nodeView,
 		position: dataFile.position
 	});
+	return {
+		id: result[0].id.id.toString(),
+		dataName: result[0].dataName,
+		format: result[0].format,
+		size: result[0].size,
+		nodeView: result[0].nodeView,
+		position: result[0].position
+	};
 }
 
 export async function updateDataName(id: string, dataName: string) {

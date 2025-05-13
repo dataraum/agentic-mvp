@@ -11,7 +11,6 @@
 	import DataFile from '$lib/ui/canvas/table-node/data-file.svelte';
 	import Query from '$lib/ui/canvas/query-node/query.svelte';
 	import { nodes, edges, resetGraph } from '$lib/ui/canvas';
-	import { resetKeys } from '$lib/signUtils';
 	import { CloseCircleSolid, ExpandOutline, TrashBinOutline } from 'flowbite-svelte-icons';
 	import '@xyflow/svelte/dist/style.css';
 	import ErrorView from '../view/error-view.svelte';
@@ -69,7 +68,6 @@
 			.then((opfsRoot) => opfsRoot.removeEntry('data', { recursive: true }))
 			.then(() =>
 				deleteItAll().then(() => {
-					resetKeys();
 					resetGraph();
 					window.location.reload();
 				})

@@ -2,7 +2,6 @@
 	import { Button, Dropzone, Modal } from 'flowbite-svelte';
 	import CsvConfigCard from './csv-config-card.svelte';
 	import { showDataUpload } from '.';
-	import { digestFile } from '$lib/signUtils';
 	import { loadDataTable } from '$lib/processor/datafusion/cf-table-api';
 	import { addDataNode } from '../canvas';
 	import { storeDataFile } from '$lib/persist/surreal/data-api';
@@ -56,21 +55,17 @@
 	async function writeCsvFile(file, csvConfig) {
 		const dataName = file.name.replace(/\.[^/.]+$/, '');
 		const fileArrayBuffer = await file.arrayBuffer(); // encode as (utf-8) Uint8Array
-		await digestFile(fileArrayBuffer).then((digest) =>
-			loadDataTable(fileArrayBuffer, csvConfig, digest, dataName).then(() => {
-				const dataFile = {
-					id: digest,
-					dataName: dataName,
-					format: 'text/csv',
-					size: file.size,
-					nodeView: 0,
-					position: { x: 50, y: 50 }
-				};
-				addDataNode(dataFile).then(() => {
-					storeDataFile(dataFile);
-				});
-			})
-		);
+		const dataFile = {
+			dataName: dataName,
+			format: 'text/csv',
+			size: file.size,
+			nodeView: 0,
+			position: { x: 50, y: 50 }
+		};
+		const result = await storeDataFile(dataFile);
+		// @ts-ignore
+		await loadDataTable(fileArrayBuffer, csvConfig, result.id, dataName);
+		await addDataNode(result);
 	}
 
 	async function importFiles() {
