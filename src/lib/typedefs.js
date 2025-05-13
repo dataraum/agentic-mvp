@@ -1,0 +1,50 @@
+/**
+ * @namespace tocqdefs
+ */
+
+/**
+ * @typedef DataNodeBody
+ * @property {string} dataName
+ * @property {number} [size]
+ * @property {string} format
+ * @property {number} [nodeView]
+ * @property {{x: number, y: number}} [position]
+ * @memberof tocqdefs
+ */
+
+/**
+ * @typedef BaseNode
+ * @property {string} [id]
+ * /
+ 
+/**
+ * @typedef {BaseNode & DataNodeBody} DataNode
+ */
+
+/**
+ * @typedef QueryNodeBody
+ * @property {string} [statement]
+ * @property {string} chartConfig
+ * @property {string} [dataId]
+ * @property {string} [dataName]
+ * @property {string} format
+ * @property {number} nodeView
+ * @property {{x: number, y: number}} position
+ * @memberof tocqdefs
+ */
+
+/**
+ * @typedef {BaseNode & QueryNodeBody} QueryNode
+ */
+
+/**
+ * @typedef CsvConfig
+ * @property {string} delimiter
+ * @property {string} quote
+ * @property {string} comment
+ * @property {string} escape
+ * @property {string} null_regex
+ * @property {boolean} truncated
+ * @memberof tocqdefs
+ */
+ 
