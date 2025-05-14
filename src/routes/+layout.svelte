@@ -8,7 +8,7 @@
 	let { children } = $props();
 
 	onMount(async () => {
-		logDataFiles();
+		//logDataFiles();
 		//only init necessary data globally
 		await openGraphDb()
 			.then(() => initFusion())

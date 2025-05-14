@@ -41,7 +41,7 @@
             />
         </div>
         <div>
-            <Label for="escape" class="text-xs">Excape (default: 'none')</Label>
+            <Label for="escape" class="text-xs">Escape (default: 'none')</Label>
             <Input
                 type="text"
                 id="escape"
