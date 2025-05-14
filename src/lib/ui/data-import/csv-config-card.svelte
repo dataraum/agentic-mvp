@@ -51,7 +51,7 @@
             />
         </div>
         <div>
-            <Label for="nullRegex" class="text-xs">Null Regex (default: '(NA)|$^')</Label>
+            <Label for="nullRegex" class="text-xs">Null Regex</Label>
             <Input
                 type="text"
                 id="nullRegex"

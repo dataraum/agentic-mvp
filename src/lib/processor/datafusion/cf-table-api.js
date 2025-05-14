@@ -48,7 +48,6 @@ export async function registerDataTable(dataId, dataName) {
  * @returns {Promise<void>}
  */
 export async function unregisterDataTable(dataName) {
-    console.log("unregisterDataTable", dataName);
     return unegister_table(dataName)
         .catch((/** @type {Error} */ e) => {
             setErrorView(e.message);

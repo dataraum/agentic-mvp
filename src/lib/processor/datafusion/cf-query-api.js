@@ -84,8 +84,8 @@ export async function getTables(sqlStatement) {
                 if (row[0] === 'physical_plan') {
                     for (const analysis of row[1].split(/\n/)) {
                         let candidate = analysis.trim();
-                        const idLength = 'ArrowExec: file_groups={1 group: [['.length;
-                        const startIndex = candidate.indexOf('ArrowExec: ');
+                        const idLength = 'DataSourceExec: file_groups={1 group: [['.length;
+                        const startIndex = candidate.indexOf('DataSourceExec: ');
                         if (startIndex == 0) {
                             const endIndex = candidate.indexOf('.arrow');
                             candidate = candidate.substring(idLength, endIndex);

@@ -44,7 +44,7 @@
 		quote: '"',
 		comment: '#',
 		escape: '',
-		null_regex: '(NA)|$^',
+		null_regex: '(#DIV\/0\!)|(#N\/A)|(NA)|$^',
 		truncated: false
 	});
 
