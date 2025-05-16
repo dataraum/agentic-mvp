@@ -8,13 +8,13 @@
  * @property {number} [size]
  * @property {string} format
  * @property {number} [nodeView]
- * @property {{x: number, y: number}} [position]
+ * @property {{x: number, y: number}} position
  * @memberof tocqdefs
  */
 
 /**
  * @typedef BaseNode
- * @property {string} [id]
+ * @property {string} id
  * /
  
 /**

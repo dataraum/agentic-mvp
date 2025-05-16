@@ -10,13 +10,13 @@
 	import dagre from '@dagrejs/dagre';
 	import DataFile from '$lib/ui/canvas/table-node/data-file.svelte';
 	import Query from '$lib/ui/canvas/query-node/query.svelte';
-	import { nodes, edges, resetGraph } from '$lib/ui/canvas';
+	import { resetGraph, getNodes, setNodes, getEdges, setEdges } from '$lib/ui/canvas/index.svelte';
 	import { CloseCircleSolid, ExpandOutline, TrashBinOutline } from 'flowbite-svelte-icons';
 	import '@xyflow/svelte/dist/style.css';
 	import ErrorView from '../view/error-view.svelte';
 	import ButtonDials from './button-dials.svelte';
 	import { deleteItAll } from '$lib/persist/surreal/queries-api';
-	import { updatePosition } from "$lib/persist/surreal";
+	import { updatePosition } from '$lib/persist/surreal';
 
 	/** @type {import('@xyflow/svelte').NodeTypes} */
 	const nodeTypes = {
@@ -31,19 +31,21 @@
 		dagreGraph.setDefaultEdgeLabel(() => ({}));
 		dagreGraph.setGraph({ rankdir: 'TB' });
 
-		$nodes.forEach((node) => {
+		const nodes = getNodes();
+		const edges = getEdges();
+		nodes.forEach((node) => {
 			if (node.measured && node.measured.width && node.measured.height) {
 				dagreGraph.setNode(node.id, { width: node.measured.width, height: node.measured.height });
 			}
 		});
 
-		$edges.forEach((edge) => {
+		edges.forEach((edge) => {
 			dagreGraph.setEdge(edge.source, edge.target);
 		});
 
 		dagre.layout(dagreGraph);
 
-		$nodes.forEach((node) => {
+		nodes.forEach((node) => {
 			const nodeWithPosition = dagreGraph.node(node.id);
 			node.targetPosition = Position.Top;
 			node.sourcePosition = Position.Bottom;
@@ -56,10 +58,11 @@
 			}
 		});
 
-		storeUpdateNodesSync($nodes);
+		storeUpdateNodesSync(nodes);
 
-		// triggers a redraw in xyflow
-		nodes.set($nodes);
+		// should... trigger a redraw in xyflow
+		// setNodes(nodes);
+		window.location.reload();
 	}
 
 	async function resetLocalData() {
@@ -96,27 +99,33 @@
 				break;
 		}
 	}
+
 	/**
-	 * @param {CustomEvent} e
+	 * @param {{ targetNode: any; nodes?: import("@xyflow/svelte").Node[]; event?: MouseEvent | TouchEvent; }} e
 	 */
 	async function persistNodePositionAfterDrag(e) {
-		storeNodePosition(e.detail.targetNode);
+		storeNodePosition(e.targetNode);
 	}
 </script>
 
 <div class="overview h-full" style="height: 100vh;">
-	<SvelteFlow {nodes} {edges} {nodeTypes} on:nodedragstop={(e) => persistNodePositionAfterDrag(e)}>
+	<SvelteFlow
+		bind:nodes={getNodes, setNodes}
+		bind:edges={getEdges, setEdges}
+		{nodeTypes}
+		onnodedragstop={(e) => persistNodePositionAfterDrag(e)}
+	>
 		<ButtonDials />
 		<ErrorView />
 		<Background />
 		<Controls>
-			<ControlButton title="shuffle layout" on:click={() => doLayout()}>
+			<ControlButton title="shuffle layout" onclick={() => doLayout()}>
 				<ExpandOutline />
 			</ControlButton>
-			<ControlButton title="reset everything" on:click={() => resetLocalData()}>
+			<ControlButton title="reset everything" onclick={() => resetLocalData()}>
 				<TrashBinOutline />
 			</ControlButton>
-			<ControlButton title="logout" on:click={() => (location.pathname = '/logout')}>
+			<ControlButton title="logout" onclick={() => (location.pathname = '/logout')}>
 				<CloseCircleSolid />
 			</ControlButton>
 		</Controls>

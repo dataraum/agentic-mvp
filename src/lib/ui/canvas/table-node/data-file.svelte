@@ -9,8 +9,8 @@
 	} from 'flowbite-svelte-icons';
 	import { onDestroy, onMount } from 'svelte';
 	import { readable, writable } from 'svelte/store';
-	import { updateSelectedView } from '$lib/persist/surreal/data-api';
-	import { deleteDataNode } from '$lib/ui/canvas';
+	import { isEditable, updateSelectedView } from '$lib/persist/surreal/data-api';
+	import { deleteDataNode } from '$lib/ui/canvas/index.svelte';
 	import { changeDataName } from '$lib/processor/datafusion/cf-table-api';
 	import { runSql } from '$lib/processor/datafusion/cf-query-api';
 
@@ -26,7 +26,7 @@
 	let table = $state();
 	let dataName = $state();
 	let nodeViewState = $state();
-	let total_items = $state(0);
+	let editable = $state(true);
 	let page = writable(0);
 	/**
 	 * @type {import("svelte/store").Unsubscriber}
@@ -38,15 +38,9 @@
 		// @ts-ignore
 		if (tblNameInput?.reportValidity()) {
 			changeDataName(dataName, data).then(() => {
-				setTotalItems();
 				data.dataName = dataName;
 			});
 		}
-	}
-	async function setTotalItems() {
-		total_items = await runSql("SELECT count(1) as total FROM '" + dataName + "'").then((r) =>
-			Number(r?.toArray()[0]['total'])
-		);
 	}
 	/**
 	 * @param {number} nodeView
@@ -65,12 +59,13 @@
 	onMount(async () => {
 		dataName = data.dataName;
 		nodeViewState = data.nodeView;
-		setTotalItems();
+		editable = await isEditable(data.id);
 		pageUnsubscribe = page.subscribe(async (pg) => {
 			table = readable(
 				await runSql("SELECT * FROM '" + data.dataName + "' LIMIT 10 OFFSET " + pg)
 			);
 		});
+		console.log('editable', editable);
 	});
 </script>
 
@@ -136,12 +131,13 @@
 							bind:value={dataName}
 							size="sm"
 							id={tblNameElId}
+							disabled={!editable}
 							class="h-8"
 							pattern="[\w\-_]&lbrace;4,32&rbrace;"
 						/>
 					</div>
 					<div class="mt-6">
-						<Button color="purple" outline size="sm" class="h-8" onclick={() => updateDataName()}
+						<Button color="purple" disabled={!editable} outline size="sm" class="h-8" onclick={() => updateDataName()}
 							>Change</Button
 						>
 					</div>

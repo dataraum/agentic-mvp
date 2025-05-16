@@ -3,7 +3,7 @@
 	import '../app.css';
 	import { openGraphDb } from '$lib/persist/surreal';
 	import { initFusion, logDataFiles } from '$lib/processor/datafusion/cf-table-api';
-	import { initFlow } from '$lib/ui/canvas';
+	import { initFlow } from '$lib/ui/canvas/index.svelte';
 
 	let { children } = $props();
 

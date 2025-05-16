@@ -1,5 +1,4 @@
 import { deleteQueryToDataImport, addEdge, storeQueryFile } from '$lib/persist/surreal/queries-api';
-import { writable } from 'svelte/store';
 import { deleteAllDataToQuery } from '$lib/persist/surreal/data-api';
 import { deleteDataTable, registerDataTable } from "$lib/processor/datafusion/cf-table-api";
 import { getTables } from '$lib/processor/datafusion/cf-query-api';
@@ -22,24 +21,38 @@ const DEFAULT_CHART_CFG = `{
 }`;
 
 const DEFAULT_QUERY_NODE = {
+	id: '',
 	format: 'df/sql',
 	chartConfig: DEFAULT_CHART_CFG,
 	nodeView: -1,
-	position: { x: 480, y: 50 }
+	position: { x: 480, y: 50 },
+	editable: true,
 };
 
 const nodeStyle =
 	'border: 1px solid #777; border-radius: 7px; padding: 10px; background: rgba(255, 255, 255, 0.65);';
 
-/** @type {import("svelte/store").Writable<import("@xyflow/svelte").Node[]>} */
-export const nodes = writable([]);
-/** @type {import("svelte/store").Writable<import("@xyflow/svelte").Edge[]>} */
-export const edges = writable([]);
+/**
+ * @type {import("@xyflow/svelte").Node[]}
+ */
+let nodes = $state.raw([]);
+/**
+ * @type {import("@xyflow/svelte").Edge[]}
+ */
+let edges = $state.raw([]);
+export const getNodes = () => nodes;
+export const getEdges = () => edges;
+
+export const setNodes = (/** @type {import("@xyflow/svelte").Node[]} */ newNodes) => {
+	console.log('setNodes', newNodes);
+	nodes = [...newNodes];
+};
+export const setEdges = (/** @type {import("@xyflow/svelte").Edge[]} */ newEdges) => edges = [...newEdges];
 
 ///// HELPER FUNCTIONS
 export function resetGraph() {
-	nodes.set([]);
-	edges.set([]);
+	nodes = [];
+	edges = [];
 }
 /**
  * @param {string} nodeType
@@ -54,11 +67,8 @@ function updateNodeStore(nodeType, data) {
 	node.position = data.position;
 	node.style = nodeStyle;
 	node.data = data;
-	nodes.update((nodeArr) => {
-		// @ts-ignore
-		nodeArr.push(node);
-		return nodeArr;
-	});
+	nodes.push(node);
+	nodes = [...nodes];
 }
 /**
  * @param {DataNode} nodeData
@@ -77,11 +87,9 @@ export function deleteDataNode(nodeId, dataName) {
 		.then(() => deleteNode(nodeId))
 		.then(() => deleteAllDataToQuery(nodeId))
 		.then(() => {
-			edges.update((edgeArr) => {
-				return edgeArr.reduce(
+			edges = edges.reduce(
 					(/** @type {import("@xyflow/svelte").Edge[]} */p, c) => (
 						c.source !== nodeId && p.push(c), p), []);
-			});
 		})
 		.then(() => deleteDataTable(nodeId, dataName));
 }
@@ -99,11 +107,9 @@ export function deleteQueryNode(nodeId) {
 		.then(() => deleteNode(nodeId))
 		.then(() => deleteQueryToDataImport(nodeId))
 		.then(() => {
-			edges.update((edgeArr) => {
-				return edgeArr.reduce(
+			edges = edges.reduce(
 					(/** @type {import("@xyflow/svelte").Edge[]} */p, c) => (
 						c.target !== nodeId && p.push(c), p), []);
-			});
 		});
 }
 /**
@@ -116,16 +122,16 @@ export async function resetImportEdges(id, query) {
 	// on the edge entry in the db to make ordering in getDataGraph possible
 	deleteQueryToDataImport(id)
 		.then(() => {
-			edges.update((edgeArr) => {
-				return edgeArr.reduce(
+			edges = edges.reduce(
 					(/** @type {import("@xyflow/svelte").Edge[]} */p, c) => (
 						c.target !== id && c.label !== 'import' && p.push(c), p), []);
-			})
 		})
 		.then(async () => {
 			(await getTables(query)).forEach((tableId) =>
 				addEdge(tableId, id).then((sourceId) =>
-					addQueryDataEdge(sourceId, id, 'import')
+					{
+						addQueryDataEdge(sourceId, id, 'import')
+					}
 				)
 			);
 		});
@@ -147,20 +153,16 @@ function addQueryDataEdge(dataId, queryId, label) {
 	queryDataEdge.data = {
 		label: label
 	};
-	edges.update((edgeArr) => {
-		edgeArr.push(queryDataEdge);
-		return edgeArr;
-	});
+	edges.push(queryDataEdge);
+	edges = [...edges];
 }
 /**
  * @param {string} nodeId
  */
 function deleteNode(nodeId) {
-	nodes.update((nodesArr) => {
-		return nodesArr.reduce(
+	nodes = nodes.reduce(
 			(/** @type {import("@xyflow/svelte").Node[]} */p, c) => (
 				c.id !== nodeId && p.push(c), p), []);
-	});
 }
 export async function initFlow() {
 	resetGraph();

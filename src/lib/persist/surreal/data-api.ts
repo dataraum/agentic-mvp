@@ -1,5 +1,15 @@
-import { surrealDb, type DataNodeRecord } from ".";
+import { surrealDb, type DataNodeRecord, type InOutEdge } from ".";
 import { RecordId } from 'surrealdb';
+
+export async function isEditable(dataId: string): Promise<boolean> {
+	const queryString = 'SELECT * FROM data:' + dataId + '->connected;';
+	const result = await surrealDb.query<InOutEdge[][]>(queryString);
+	if (result && result[0] && result[0][0] && result[0][0].in.id.toString() === dataId) {
+		return false;
+	} else {
+		return true;
+	}
+}
 
 export async function getDatasetData(dataId: string): Promise<DataNode> {
 	const result = await surrealDb.select<DataNodeRecord>(
@@ -11,7 +21,7 @@ export async function getDatasetData(dataId: string): Promise<DataNode> {
 		format: result.format,
 		size: result.size,
 		nodeView: result.nodeView,
-		position: result.position
+		position: result.position,
 	};
 }
 
@@ -21,7 +31,7 @@ export async function storeDataFile(dataFile: DataNode): Promise<DataNode> {
 		dataName: dataFile.dataName,
 		size: dataFile.size,
 		nodeView: dataFile.nodeView,
-		position: dataFile.position
+		position: dataFile.position,
 	});
 	return {
 		id: result[0].id.id.toString(),
@@ -29,7 +39,7 @@ export async function storeDataFile(dataFile: DataNode): Promise<DataNode> {
 		format: result[0].format,
 		size: result[0].size,
 		nodeView: result[0].nodeView,
-		position: result[0].position
+		position: result[0].position,
 	};
 }
 
@@ -48,6 +58,6 @@ export async function updateSelectedView(id: string, viewId: number) {
 }
 
 export async function deleteAllDataToQuery(id: string) {
-	const queryString = 'DELETE data:' + id + '<-import;DELETE data:' + id + '<-show;';
+	const queryString = 'DELETE data:' + id + '->connected;';
 	surrealDb.query(queryString);
 }

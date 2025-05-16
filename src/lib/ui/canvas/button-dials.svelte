@@ -13,7 +13,7 @@
 		TruckOutline,
 		UploadOutline
 	} from 'flowbite-svelte-icons';
-	import { addQueryNode } from '$lib/ui/canvas';
+	import { addQueryNode } from '$lib/ui/canvas/index.svelte';
 	import { showDataUpload } from '../data-import';
 </script>
 

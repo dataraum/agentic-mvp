@@ -8,7 +8,7 @@
 	import TableView from '$lib/ui/view/table-view.svelte';
 	import { onDestroy, onMount } from 'svelte';
 	import ChartView from '$lib/ui/view/chart-view.svelte';
-	import { deleteQueryNode, resetImportEdges } from '$lib/ui/canvas';
+	import { deleteQueryNode, resetImportEdges } from '$lib/ui/canvas/index.svelte';
 	import { DetailView } from '.';
 	import QueryButtonGroup from './query-button-group.svelte';
 	import { schemas } from '$lib/processor/datafusion/cf-table-api';

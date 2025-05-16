@@ -1,8 +1,8 @@
-import { RecordId, StringRecordId } from "surrealdb";
-import { surrealDb, type GeneralResult, type InOutEdge, type QueryNodeRecord } from ".";
+import { RecordId } from "surrealdb";
+import { surrealDb, type GeneralResult, type QueryNodeRecord } from ".";
 
 export async function deleteQueryToDataImport(queryId: string) {
-	const queryString = 'DELETE queries:' + queryId + '->import;';
+	const queryString = 'DELETE queries:' + queryId + '->connected;';
 	surrealDb.query(queryString);
 }
 
@@ -14,7 +14,7 @@ export async function addEdge(sourceId: string, targetId: string): Promise<strin
 	if (result && result[0] && result[0][0]) {
 		sourceId = result[0][0].id.id.toString();
 	}
-	const queryString = 'RELATE queries:' + sourceId + '->import->data:' + targetId + ';';
+	const queryString = 'RELATE data:' + sourceId + '->connected->queries:' + targetId + ';';
 	surrealDb.query(queryString);
 
 	return sourceId;

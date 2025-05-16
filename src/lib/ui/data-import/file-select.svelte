@@ -3,7 +3,7 @@
 	import CsvConfigCard from './csv-config-card.svelte';
 	import { showDataUpload } from '.';
 	import { loadDataTable } from '$lib/processor/datafusion/cf-table-api';
-	import { addDataNode } from '../canvas';
+	import { addDataNode } from '../canvas/index.svelte';
 	import { storeDataFile } from '$lib/persist/surreal/data-api';
 	import { RocketOutline } from 'flowbite-svelte-icons';
 
@@ -56,11 +56,13 @@
 		const dataName = file.name.replace(/\.[^/.]+$/, '');
 		const fileArrayBuffer = await file.arrayBuffer(); // encode as (utf-8) Uint8Array
 		const dataFile = {
+			id: '',
 			dataName: dataName,
 			format: 'text/csv',
 			size: file.size,
 			nodeView: 0,
-			position: { x: 50, y: 50 }
+			position: { x: 50, y: 50 },
+			editable: true,
 		};
 		const result = await storeDataFile(dataFile);
 		// @ts-ignore

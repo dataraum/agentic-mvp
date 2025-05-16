@@ -31,7 +31,7 @@ export async function openGraphDb() {
 
 export async function getDataGraph(): Promise<any> {
 	const result = surrealDb.query<GeneralResult[][]>(
-		'SELECT * FROM data;SELECT * FROM queries;SELECT * FROM import;'
+		'SELECT * FROM data;SELECT * FROM queries;SELECT * FROM connected;'
 	);
 	const retResult = {
 		data: [] as DataNode[],
@@ -49,7 +49,7 @@ export async function getDataGraph(): Promise<any> {
 						format: dataEntry.format,
 						size: dataEntry.size,
 						nodeView: dataEntry.nodeView,
-						position: dataEntry.position
+						position: dataEntry.position,
 					});
 					break;
 				case 'queries':
@@ -65,12 +65,12 @@ export async function getDataGraph(): Promise<any> {
 						position: queryEntry.position
 					});
 					break;
-				case 'import':
-					const importEntry = entry as InOutEdge;
+				case 'connected':
+					const connectedEntry = entry as InOutEdge;
 					retResult.import.push({
-						id: importEntry.id,
-						in: importEntry.in,
-						out: importEntry.out
+						id: connectedEntry.id,
+						in: connectedEntry.in,
+						out: connectedEntry.out
 					});
 				break;
 			}
