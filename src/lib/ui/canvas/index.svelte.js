@@ -26,7 +26,6 @@ const DEFAULT_QUERY_NODE = {
 	chartConfig: DEFAULT_CHART_CFG,
 	nodeView: -1,
 	position: { x: 480, y: 50 },
-	editable: true,
 };
 
 const nodeStyle =
@@ -43,10 +42,7 @@ let edges = $state.raw([]);
 export const getNodes = () => nodes;
 export const getEdges = () => edges;
 
-export const setNodes = (/** @type {import("@xyflow/svelte").Node[]} */ newNodes) => {
-	console.log('setNodes', newNodes);
-	nodes = [...newNodes];
-};
+export const setNodes = (/** @type {import("@xyflow/svelte").Node[]} */ newNodes) => nodes = [...newNodes];
 export const setEdges = (/** @type {import("@xyflow/svelte").Edge[]} */ newEdges) => edges = [...newEdges];
 
 ///// HELPER FUNCTIONS
@@ -88,8 +84,8 @@ export function deleteDataNode(nodeId, dataName) {
 		.then(() => deleteAllDataToQuery(nodeId))
 		.then(() => {
 			edges = edges.reduce(
-					(/** @type {import("@xyflow/svelte").Edge[]} */p, c) => (
-						c.source !== nodeId && p.push(c), p), []);
+				(/** @type {import("@xyflow/svelte").Edge[]} */p, c) => (
+					c.source !== nodeId && p.push(c), p), []);
 		})
 		.then(() => deleteDataTable(nodeId, dataName));
 }
@@ -108,8 +104,8 @@ export function deleteQueryNode(nodeId) {
 		.then(() => deleteQueryToDataImport(nodeId))
 		.then(() => {
 			edges = edges.reduce(
-					(/** @type {import("@xyflow/svelte").Edge[]} */p, c) => (
-						c.target !== nodeId && p.push(c), p), []);
+				(/** @type {import("@xyflow/svelte").Edge[]} */p, c) => (
+					c.target !== nodeId && p.push(c), p), []);
 		});
 }
 /**
@@ -123,15 +119,13 @@ export async function resetImportEdges(id, query) {
 	deleteQueryToDataImport(id)
 		.then(() => {
 			edges = edges.reduce(
-					(/** @type {import("@xyflow/svelte").Edge[]} */p, c) => (
-						c.target !== id && c.label !== 'import' && p.push(c), p), []);
+				(/** @type {import("@xyflow/svelte").Edge[]} */p, c) => (
+					c.target !== id && c.label !== 'import' && p.push(c), p), []);
 		})
 		.then(async () => {
 			(await getTables(query)).forEach((tableId) =>
-				addEdge(tableId, id).then((sourceId) =>
-					{
-						addQueryDataEdge(sourceId, id, 'import')
-					}
+				addEdge(tableId, id).then((sourceId) => 
+					addQueryDataEdge(sourceId, id, 'import')
 				)
 			);
 		});
@@ -161,8 +155,8 @@ function addQueryDataEdge(dataId, queryId, label) {
  */
 function deleteNode(nodeId) {
 	nodes = nodes.reduce(
-			(/** @type {import("@xyflow/svelte").Node[]} */p, c) => (
-				c.id !== nodeId && p.push(c), p), []);
+		(/** @type {import("@xyflow/svelte").Node[]} */p, c) => (
+			c.id !== nodeId && p.push(c), p), []);
 }
 export async function initFlow() {
 	resetGraph();

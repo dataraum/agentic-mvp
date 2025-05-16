@@ -1,5 +1,5 @@
 <script>
-	import { Handle, Position } from '@xyflow/svelte';
+	import { Handle, Position, useNodeConnections } from '@xyflow/svelte';
 	import { Alert, Button, ButtonGroup, Input, Label } from 'flowbite-svelte';
 	import {
 		CloseCircleSolid,
@@ -9,13 +9,15 @@
 	} from 'flowbite-svelte-icons';
 	import { onDestroy, onMount } from 'svelte';
 	import { readable, writable } from 'svelte/store';
-	import { isEditable, updateSelectedView } from '$lib/persist/surreal/data-api';
+	import { updateSelectedView } from '$lib/persist/surreal/data-api';
 	import { deleteDataNode } from '$lib/ui/canvas/index.svelte';
 	import { changeDataName } from '$lib/processor/datafusion/cf-table-api';
 	import { runSql } from '$lib/processor/datafusion/cf-query-api';
 
 	let { data, id } = $props();
 	let tblNameElId = window ? window.crypto.randomUUID() : '';
+
+	const connections = useNodeConnections();
 
 	const DetailView = Object.freeze({
 		ViewTable: 1,
@@ -26,7 +28,6 @@
 	let table = $state();
 	let dataName = $state();
 	let nodeViewState = $state();
-	let editable = $state(true);
 	let page = writable(0);
 	/**
 	 * @type {import("svelte/store").Unsubscriber}
@@ -59,13 +60,11 @@
 	onMount(async () => {
 		dataName = data.dataName;
 		nodeViewState = data.nodeView;
-		editable = await isEditable(data.id);
 		pageUnsubscribe = page.subscribe(async (pg) => {
 			table = readable(
 				await runSql("SELECT * FROM '" + data.dataName + "' LIMIT 10 OFFSET " + pg)
 			);
 		});
-		console.log('editable', editable);
 	});
 </script>
 
@@ -131,13 +130,13 @@
 							bind:value={dataName}
 							size="sm"
 							id={tblNameElId}
-							disabled={!editable}
+							disabled={connections.current.length > 0}
 							class="h-8"
 							pattern="[\w\-_]&lbrace;4,32&rbrace;"
 						/>
 					</div>
 					<div class="mt-6">
-						<Button color="purple" disabled={!editable} outline size="sm" class="h-8" onclick={() => updateDataName()}
+						<Button color="purple" disabled={connections.current.length > 0} outline size="sm" class="h-8" onclick={() => updateDataName()}
 							>Change</Button
 						>
 					</div>

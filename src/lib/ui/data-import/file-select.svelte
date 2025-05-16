@@ -62,7 +62,6 @@
 			size: file.size,
 			nodeView: 0,
 			position: { x: 50, y: 50 },
-			editable: true,
 		};
 		const result = await storeDataFile(dataFile);
 		// @ts-ignore

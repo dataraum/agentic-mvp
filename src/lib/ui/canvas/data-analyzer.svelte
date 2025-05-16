@@ -4,10 +4,9 @@
 		Background,
 		Controls,
 		MiniMap,
-		Position,
 		ControlButton
 	} from '@xyflow/svelte';
-	import dagre from '@dagrejs/dagre';
+	import Dagre from '@dagrejs/dagre';
 	import DataFile from '$lib/ui/canvas/table-node/data-file.svelte';
 	import Query from '$lib/ui/canvas/query-node/query.svelte';
 	import { resetGraph, getNodes, setNodes, getEdges, setEdges } from '$lib/ui/canvas/index.svelte';
@@ -27,42 +26,43 @@
 	};
 
 	function doLayout() {
-		const dagreGraph = new dagre.graphlib.Graph();
+		const dagreGraph = new Dagre.graphlib.Graph();
 		dagreGraph.setDefaultEdgeLabel(() => ({}));
 		dagreGraph.setGraph({ rankdir: 'TB' });
 
-		const nodes = getNodes();
+		let nodes = getNodes();
 		const edges = getEdges();
 		nodes.forEach((node) => {
-			if (node.measured && node.measured.width && node.measured.height) {
-				dagreGraph.setNode(node.id, { width: node.measured.width, height: node.measured.height });
-			}
+			dagreGraph.setNode(node.id, {
+				...node,
+				width: node.measured?.width ?? 0,
+				height: node.measured?.height ?? 0
+			});
 		});
 
 		edges.forEach((edge) => {
 			dagreGraph.setEdge(edge.source, edge.target);
 		});
 
-		dagre.layout(dagreGraph);
+		Dagre.layout(dagreGraph);
 
-		nodes.forEach((node) => {
-			const nodeWithPosition = dagreGraph.node(node.id);
-			node.targetPosition = Position.Top;
-			node.sourcePosition = Position.Bottom;
+		nodes = nodes.map((node) => {
+			const position = dagreGraph.node(node.id);
+			// We are shifting the dagre node position (anchor=center center) to the top left
+			// so it matches the Svelte Flow node anchor point (top left).
+			const x = position.x - (node.measured?.width ?? 0) / 2 + 50;
+			const y = position.y - (node.measured?.height ?? 0) / 2 + 70;
 
-			if (node.measured && node.measured.width && node.measured.height) {
-				node.position = {
-					x: nodeWithPosition.x - node.measured.width / 2 + 50,
-					y: nodeWithPosition.y - node.measured.height / 2 + 70
-				};
-			}
+			return {
+				...node,
+				position: { x, y }
+			};
 		});
 
 		storeUpdateNodesSync(nodes);
 
-		// should... trigger a redraw in xyflow
-		// setNodes(nodes);
-		window.location.reload();
+		// trigger a redraw in xyflow
+		setNodes(nodes);
 	}
 
 	async function resetLocalData() {
