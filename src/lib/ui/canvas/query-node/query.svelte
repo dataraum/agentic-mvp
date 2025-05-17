@@ -1,7 +1,7 @@
 <script>
-	import { Handle, Position } from '@xyflow/svelte';
+	import { Handle, Position, useNodeConnections } from '@xyflow/svelte';
 	import { A, Alert, Button, Input, Toggle } from 'flowbite-svelte';
-	import { CloseCircleSolid } from 'flowbite-svelte-icons';
+	import { CloseCircleSolid, InfoCircleOutline } from 'flowbite-svelte-icons';
 	import SqlEditor from '$lib/ui/editor/sql-editor.svelte';
 	import JsEditor from '$lib/ui/editor/js-editor.svelte';
 	import { readable, writable } from 'svelte/store';
@@ -19,6 +19,8 @@
 		unpersistedQueryNode
 	} from '$lib/processor/datafusion/cf-query-api';
 	import { updateQueryFile } from '$lib/persist/surreal/queries-api';
+
+	const connections = useNodeConnections();
 
 	let { data, id } = $props();
 
@@ -38,6 +40,10 @@
 	let page = writable(0);
 	let chartComponent = $state();
 	let persistedState = $state();
+	let tableNameChangeable = $state(true);
+	$effect(() => {
+		tableNameChangeable = connections.current.every((conn) => conn.source !== id);
+	});
 
 	/**
 	 * @type {import("svelte/store").Unsubscriber}
@@ -55,16 +61,16 @@
 		if (tblNameInput?.reportValidity()) {
 			if ($table && persistedState) {
 				if (data.dataId) {
-						changePersistedQueryName(dataName, data).then(() => {
-							data.dataName = dataName;
-						});
-					} else {
-						addPersistedQuery(data.statement, dataName, id).then((dataId) => {
-							data.dataName = dataName;
-							data.persisted = true;
-							data.dataId = dataId;
-						});
-					}
+					changePersistedQueryName(dataName, data).then(() => {
+						data.dataName = dataName;
+					});
+				} else {
+					addPersistedQuery(data.statement, dataName, id).then((dataId) => {
+						data.dataName = dataName;
+						data.persisted = true;
+						data.dataId = dataId;
+					});
+				}
 			} else {
 				// delete table again
 				const oldDataName = data.dataName;
@@ -121,6 +127,12 @@
 		pageUnsubscribe = page.subscribe(async (pg) => {
 			slicedTable = readable($table?.slice(pg, pg + 10));
 		});
+		console.log(
+			'TEST:',
+			connections.current.every((conn) => conn.source !== id)
+		);
+		console.log('ID:', id);
+		console.log('query node mounted', connections.current);
 	});
 </script>
 
@@ -143,7 +155,7 @@
 		</div>
 		<QueryButtonGroup {selectedView} {chartComponent} />
 	</div>
-	<Alert color="blue" class="mb-1 mt-4 py-2">
+	<Alert color="blue" class="mt-4 mb-1 py-2">
 		<SqlEditor {sqlText} {sqlEditorElementId} {schemas} />
 	</Alert>
 	{#if $selectedView === DetailView.ViewTable && slicedTable && !persistedState}
@@ -152,11 +164,9 @@
 		<Alert color="red" class="mt-4 py-2">
 			<JsEditor {jsText} {jsEditorElementId} />
 		</Alert>
-		<div class="ml-1 mt-2 text-sm">
-			<A
-				color="blue"
-				href="https://www.chartjs.org/docs/latest/configuration/"
-				target="_blank">Chart.js configuration</A
+		<div class="mt-2 ml-1 text-sm">
+			<A color="blue" href="https://www.chartjs.org/docs/latest/configuration/" target="_blank"
+				>Chart.js configuration</A
 			>
 			using the underlying
 			<A
@@ -172,9 +182,12 @@
 	{:else}
 		<Alert color="teal" class="mt-4 p-1">
 			<div class="mb-2 flex">
-				<div class="ml-4 mt-4 h-8 w-64">
-					<Toggle id="tgl_{tblNameElId}" color="purple" bind:checked={persistedState}
-						>Persist query results as table</Toggle
+				<div class="mt-4 ml-4 h-8 w-64">
+					<Toggle
+						id="tgl_{tblNameElId}"
+						color="purple"
+						bind:checked={persistedState}
+						disabled={!tableNameChangeable}>Persist query results as table</Toggle
 					>
 				</div>
 				<div class="mt-3 w-64">
@@ -184,22 +197,25 @@
 						bind:value={dataName}
 						size="sm"
 						class="h-8"
-						disabled={!persistedState}
+						disabled={!persistedState || !tableNameChangeable}
 						pattern="[\w\-_]&lbrace;4,32&rbrace;"
 						placeholder="Table name"
 					/>
 				</div>
-				<div class="ml-4 mt-3">
+				<div class="mt-3 ml-4">
 					<Button
 						color="purple"
 						outline
-						disabled={!(persistedState || dataName)}
+						disabled={!tableNameChangeable}
 						size="sm"
 						class="h-8"
 						onclick={() => persistQueryAsTable()}>Save state</Button
 					>
 				</div>
 			</div>
+			{#if !tableNameChangeable}
+				<div class="mt-3 mb-1 ml-2 pl-2 text-sm flex"><InfoCircleOutline />&nbsp;Can only be changed without depending nodes.</div>
+			{/if}
 		</Alert>
 	{/if}
 </div>

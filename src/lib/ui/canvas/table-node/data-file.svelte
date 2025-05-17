@@ -141,6 +141,9 @@
 						>
 					</div>
 				</div>
+			{#if connections.current.length > 0}
+				<div class="mt-3 ml-1 pl-2 text-sm flex"><InfoCircleOutline />&nbsp;Can only be changed without depending nodes.</div>
+			{/if}
 			</Alert>
 		{/if}
 	</div>
