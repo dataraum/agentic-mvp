@@ -1,5 +1,5 @@
 <script>
-	import { setErrorView } from '$lib/errorUtils';
+	import { setErrorView } from '$lib/ui/errorUtils';
 	import { Chart, registerables } from 'chart.js';
 	import { onMount } from 'svelte';
 

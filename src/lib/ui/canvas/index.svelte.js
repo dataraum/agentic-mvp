@@ -1,7 +1,7 @@
 import { deleteQueryToDataImport, addEdge, storeQueryFile } from '$lib/persist/surreal/queries-api';
 import { deleteAllDataToQuery } from '$lib/persist/surreal/data-api';
 import { deleteDataTable, registerDataTable } from "$lib/processor/datafusion/cf-table-api";
-import { getTables } from '$lib/processor/datafusion/cf-query-api';
+import { getTables, unpersistedQueryNode } from '$lib/processor/datafusion/cf-query-api';
 import { showDataUpload } from '../data-import';
 import { deleteNodeRecord, getDataGraph } from '$lib/persist/surreal';
 
@@ -96,16 +96,17 @@ export async function addQueryNode() {
 	});
 }
 /**
- * @param {string} nodeId 
+ * @param {QueryNode} data 
  */
-export function deleteQueryNode(nodeId) {
-	deleteNodeRecord('queries', nodeId)
-		.then(() => deleteNode(nodeId))
-		.then(() => deleteQueryToDataImport(nodeId))
+export function deleteQueryNode(data) {
+	unpersistedQueryNode(data, data.dataId ?? '', data.dataName ?? '')
+		.then(() => deleteNodeRecord('queries', data.id))
+		.then(() => deleteNode(data.id))
+		.then(() => deleteQueryToDataImport(data.id))
 		.then(() => {
 			edges = edges.reduce(
 				(/** @type {import("@xyflow/svelte").Edge[]} */p, c) => (
-					c.target !== nodeId && p.push(c), p), []);
+					c.target !== data.id && p.push(c), p), []);
 		});
 }
 /**

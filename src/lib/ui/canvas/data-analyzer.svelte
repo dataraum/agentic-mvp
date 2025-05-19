@@ -115,7 +115,7 @@
 		{nodeTypes}
 		onnodedragstop={(e) => persistNodePositionAfterDrag(e)}
 	>
-		<ButtonDials />
+		<!--ButtonDials /-->
 		<ErrorView />
 		<Background />
 		<Controls>
@@ -125,9 +125,9 @@
 			<ControlButton title="reset everything" onclick={() => resetLocalData()}>
 				<TrashBinOutline />
 			</ControlButton>
-			<ControlButton title="logout" onclick={() => (location.pathname = '/logout')}>
+			<!--ControlButton title="logout" onclick={() => (location.pathname = '/logout')}>
 				<CloseCircleSolid />
-			</ControlButton>
+			</ControlButton-->
 		</Controls>
 		<MiniMap zoomable pannable height={120} />
 	</SvelteFlow>
