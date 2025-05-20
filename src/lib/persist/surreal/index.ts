@@ -3,6 +3,7 @@ import { surrealdbWasmEngines } from '@surrealdb/wasm';
 
 export type DataNodeRecord = DataNodeBody & GeneralResult;
 export type QueryNodeRecord = QueryNodeBody & GeneralResult;
+export type ChartNodeRecord = ChartNodeBody & GeneralResult;
 export type GeneralResult = {
 	id: RecordId;
 };
@@ -31,11 +32,12 @@ export async function openGraphDb() {
 
 export async function getDataGraph(): Promise<any> {
 	const result = surrealDb.query<GeneralResult[][]>(
-		'SELECT * FROM data;SELECT * FROM queries;SELECT * FROM connected;'
+		'SELECT * FROM data;SELECT * FROM queries;SELECT * FROM charts;SELECT * FROM connected;'
 	);
 	const retResult = {
 		data: [] as DataNode[],
 		queries: [] as QueryNode[],
+		charts: [] as ChartNode[],
 		import: [] as InOutEdge[]
 	};
 	(await result).map((data) => {
@@ -61,6 +63,16 @@ export async function getDataGraph(): Promise<any> {
 						position: queryEntry.position
 					});
 					break;
+				case 'charts':
+					const chartEntry = entry as ChartNodeRecord;
+					retResult.charts.push({
+						id: chartEntry.id.id.toString(),
+						queryId: chartEntry.queryId,
+						chartName: chartEntry.chartName,
+						chartConfig: chartEntry.chartConfig,
+						position: chartEntry.position
+					});
+					break;
 				case 'connected':
 					const connectedEntry = entry as InOutEdge;
 					retResult.import.push({
@@ -68,7 +80,7 @@ export async function getDataGraph(): Promise<any> {
 						in: connectedEntry.in,
 						out: connectedEntry.out
 					});
-				break;
+					break;
 			}
 		});
 	});
@@ -91,3 +103,8 @@ export async function updateDataName(table: string, id: string, dataName: string
 		dataName: dataName
 	});
 }
+
+export async function deleteItAll() {
+	surrealDb.query('REMOVE DATABASE proto;');
+}
+

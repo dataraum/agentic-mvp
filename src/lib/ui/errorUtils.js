@@ -1,7 +1,6 @@
 import { writable } from "svelte/store";
 ///// SVELTE STORES
 export const errorView = writable({
-	color: 'red',
 	visibility: 'hidden',
 	msg: '...'
 });
@@ -11,7 +10,6 @@ export const errorView = writable({
  */
 export function setErrorView(msg) {
 	errorView.set({
-		color: 'red',
 		visibility: 'visible',
 		msg: msg
 	});

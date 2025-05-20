@@ -1,12 +1,14 @@
-import { deleteQueryToDataImport, addEdge, storeQueryFile } from '$lib/persist/surreal/queries-api';
+import { deleteQueryToDataImport, addDataQueryEdge, storeQueryFile } from '$lib/persist/surreal/queries-api';
 import { deleteAllDataToQuery } from '$lib/persist/surreal/data-api';
 import { deleteDataTable, registerDataTable } from "$lib/processor/datafusion/cf-table-api";
 import { getTables } from '$lib/processor/datafusion/cf-query-api';
 import { deleteNodeRecord, getDataGraph } from '$lib/persist/surreal';
 import randomName from '@scaleway/random-name';
 import { setTableCache } from '../datasets.svelte';
+import { storeChartConfig } from '$lib/persist/surreal/chart-api';
 
 export const DATA_NODE_TYPE = 'dataNode';
+export const CHART_NODE_TYPE = 'chartNode';
 export const QUERY_NODE_TYPE = 'queryNode';
 const DEFAULT_CHART_CFG = `{
 	type: 'bar',
@@ -25,6 +27,14 @@ const DEFAULT_QUERY_NODE = {
 	id: '',
 	format: 'df/sql',
 	dataName: '',
+	position: { x: 480, y: 50 },
+};
+
+const DEFAULT_CHART_NODE = {
+	id: '',
+	queryId: '',
+	chartConfig: DEFAULT_CHART_CFG,
+	chartName: '',
 	position: { x: 480, y: 50 },
 };
 
@@ -52,7 +62,7 @@ export function resetGraph() {
 }
 /**
  * @param {string} nodeType
- * @param {DataNode | QueryNode} data
+ * @param {DataNode | QueryNode | ChartNode} data
  */
 function updateNodeStore(nodeType, data) {
 	const node = {};
@@ -85,15 +95,40 @@ export async function addQueryNode() {
 	let data = { ...DEFAULT_QUERY_NODE, dataName: randomName('', '_') };
 	await storeQueryFile(data).then((id) => {
 		setTableCache(data.dataName, undefined);
-		data = { ...data, id: id};
+		data = { ...data, id: id };
 		updateNodeStore(QUERY_NODE_TYPE, data);
 	});
 }
 /**
- * @param {DataNode | QueryNode} dataset
+ * @param {DataNode} dataset
  */
 export function addDataNode(dataset) {
-	updateNodeStore(DATA_NODE_TYPE, dataset);
+	const statement = "SELECT * FROM '" + dataset.dataName + "'";
+	setTableCache(dataset.dataName, statement)
+		.then(() => updateNodeStore(DATA_NODE_TYPE, dataset));
+}
+/**
+ * @param {string} queryId
+ */
+export async function addChartNode(queryId) {
+	let data = { ...DEFAULT_CHART_NODE, chartName: randomName('', '_'), queryId: queryId };
+	await storeChartConfig(data).then((id) => {
+		data = { ...data, id: id };
+		updateNodeStore(CHART_NODE_TYPE, data);
+		addEdge(data.queryId, data.id, 'import');
+	});
+}
+/**
+ * @param {string} id 
+ */
+export function deleteChartNode(id) {
+	deleteNodeRecord('charts', id)
+		.then(() => deleteNode(id))
+		.then(() => {
+			edges = edges.reduce(
+				(/** @type {import("@xyflow/svelte").Edge[]} */p, c) => (
+					c.target !== id && p.push(c), p), []);
+		});
 }
 /**
  * @param {string} id 
@@ -124,8 +159,8 @@ export async function resetImportEdges(id, query) {
 		})
 		.then(async () => {
 			(await getTables(query)).forEach((tableId) =>
-				addEdge(tableId, id).then(() =>
-					addQueryDataEdge(tableId, id, 'import')
+				addDataQueryEdge(tableId, id).then(() =>
+					addEdge(tableId, id, 'import')
 				)
 			);
 		});
@@ -135,7 +170,7 @@ export async function resetImportEdges(id, query) {
  * @param {string} queryId
  * @param {string} label
  */
-function addQueryDataEdge(dataId, queryId, label) {
+function addEdge(dataId, queryId, label) {
 	const queryDataEdge = {};
 	//data
 	queryDataEdge.source = dataId;
@@ -167,8 +202,6 @@ export async function initFlow() {
 	}
 	for (const dataset of allData.data) {
 		await registerDataTable(dataset.id, dataset.dataName);
-		const statement = "SELECT * FROM '" + dataset.dataName + "'";
-		await setTableCache(dataset.dataName, statement);
 		addDataNode(dataset);
 	}
 	for (const query of allData.queries) {
@@ -178,7 +211,11 @@ export async function initFlow() {
 		}
 		updateNodeStore(QUERY_NODE_TYPE, query);
 	}
+	for (const chart of allData.charts) {
+		updateNodeStore(CHART_NODE_TYPE, chart);
+		addEdge(chart.queryId, chart.id, 'import');
+	}
 	for (const edge of allData.import) {
-		addQueryDataEdge(edge.in.id.toString(), edge.out.id.toString(), 'import');
+		addEdge(edge.in.id.toString(), edge.out.id.toString(), 'import');
 	}
 }

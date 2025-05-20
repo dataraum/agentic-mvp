@@ -5,17 +5,17 @@
 	import Query from '$lib/ui/canvas/query-node/query.svelte';
 	import { resetGraph, getNodes, setNodes, getEdges, setEdges } from '$lib/ui/canvas/index.svelte';
 	import '@xyflow/svelte/dist/style.css';
-	//import ErrorView from '../view/error-view.svelte';
-	import { deleteItAll } from '$lib/persist/surreal/queries-api';
+	import ErrorView from '../view/error-view.svelte';
+		import { deleteItAll } from "$lib/persist/surreal";
 	import { updatePosition } from '$lib/persist/surreal';
 	import ButtonDials from './button-dials.svelte';
+	import Chart from './chart-node/chart.svelte';
 
 	/** @type {import('@xyflow/svelte').NodeTypes} */
 	const nodeTypes = {
-		// @ts-ignore
 		dataNode: DataFile,
-		// @ts-ignore
-		queryNode: Query
+		queryNode: Query,
+		chartNode: Chart,
 	};
 
 	let zoomOnScroll = true;
@@ -92,6 +92,9 @@
 			case 'dataNode':
 				await updatePosition('data', node.position, node.id);
 				break;
+			case 'chartNode':
+				await updatePosition('charts', node.position, node.id);
+				break;
 		}
 	}
 
@@ -115,7 +118,7 @@
 		onnodepointerleave={() => zoomOnScroll = true}
 	>
 		<ButtonDials />
-		<!--ErrorView /-->
+		<ErrorView />
 		<Background />
 		<Controls>
 			<ControlButton title="shuffle layout" onclick={() => doLayout()}>

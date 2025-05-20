@@ -8,12 +8,11 @@
 
 	onMount(() => {
 		table = getCachedTable(dataName);
-		console.log('table', table);
 	});
 </script>
 
 {#if $table}
-	<div class="h-96 w-96" style="overflow-x:auto;">
+	<div class="h-48 w-96 bg-secondary/30 rounded-sm p-0.5" style="overflow-x:auto;">
 		<table class="table-xs table-pin-rows table-pin-cols table">
 			<thead>
 				<tr>
@@ -36,5 +35,5 @@
 		</table>
 	</div>
 {:else}
-	<div class="skeleton h-96 w-96"></div>
+	<div class="skeleton h-48 w-96"></div>
 {/if}

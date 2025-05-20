@@ -1,11 +1,9 @@
 <script>
 	import { Handle, Position, useNodeConnections } from '@xyflow/svelte';
 	import SqlEditor from '$lib/ui/editor/sql/sql-editor.svelte';
-	import JsEditor from '$lib/ui/editor/js-editor.svelte';
 	import { writable } from 'svelte/store';
 	import { onDestroy, onMount } from 'svelte';
-	import ChartView from '$lib/ui/view/chart-view.svelte';
-	import { deleteQueryNode, resetImportEdges } from '$lib/ui/canvas/index.svelte';
+	import { addChartNode, deleteQueryNode, resetImportEdges } from '$lib/ui/canvas/index.svelte';
 	import { changePersistedQueryName } from '$lib/processor/datafusion/cf-query-api';
 	import { updateQueryStatement } from '$lib/persist/surreal/queries-api';
 	import TableView from '$lib/ui/view/table-view.svelte';
@@ -14,15 +12,11 @@
 
 	let { data, id } = $props();
 
-	let jsEditorElementId = window ? window.crypto.randomUUID() : '';
-	let chartViewElementId = window ? window.crypto.randomUUID() : '';
 	let tblNameElId = window ? window.crypto.randomUUID() : '';
 
 	let sqlText = writable(data.statement);
-	let jsText = writable(data.chartConfig);
 
 	let dataName = $state();
-	let chartComponent = $state();
 	let tableNameChangeable = $state(true);
 	let editName = $state(false);
 	$effect(() => {
@@ -110,32 +104,20 @@
 		</div>
 	{/if}
 </div>
-<div class="mt-4">
+<div class="bg-secondary/30 mt-4 rounded-sm p-1">
 	<SqlEditor {sqlText} dataName={data.dataName} dataId={id} />
 </div>
 <div class="mt-4 mb-1">
 	<TableView dataName={data.dataName} />
 </div>
-<!--
-	<{#if $selectedView === DetailView.ViewChartEditor && $table}
-		<Alert color="red" class="mt-4 py-2">
-			<JsEditor {jsText} {jsEditorElementId} />
-		</Alert>
-		<div class="mt-2 ml-1 text-sm">
-			<A color="blue" href="https://www.chartjs.org/docs/latest/configuration/" target="_blank"
-				>Chart.js configuration</A
-			>
-			using the underlying
-			<A
-				color="blue"
-				href="https://arrow.apache.org/docs/js/classes/Arrow_dom.Table.html"
-				target="_blank">Arrow table</A
-			>. The 'table' is stored in memory within this context.
-		</div>
-	{:else if $selectedView === DetailView.ViewChart && $table}
-		<div class="mt-4">
-			<ChartView {jsText} {table} {chartViewElementId} bind:this={chartComponent} />
-		</div>
-	{:else}
-</div-->
+<div class="mt-2 flex flex-row items-center justify-center">
+	<div class="tooltip tooltip-secondary tooltip-left" data-tip="Add Chart">
+		<button
+			aria-label="Add Chart"
+			class="btn btn-sm btn-circle btn-ghost btn-secondary"
+			onclick={() => addChartNode(id)}
+			><span class="icon-[ph--chart-bar-bold] h-6 w-6"></span></button
+		>
+	</div>
+</div>
 <Handle type="source" position={Position.Bottom} />

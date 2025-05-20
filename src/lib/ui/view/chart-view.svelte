@@ -2,9 +2,15 @@
 	import { setErrorView } from '$lib/ui/errorUtils';
 	import { Chart, registerables } from 'chart.js';
 	import { onMount } from 'svelte';
+	import { getCachedTable } from '../datasets.svelte';
 
-	let { table, jsText, chartViewElementId } = $props();
+	let { jsText, dataName } = $props();
+
+	let chartViewElementId = window ? window.crypto.randomUUID() : '';
 	let canvasElId = window ? window.crypto.randomUUID() : '';
+
+	let table = $state();
+
 	/**
 	 * @type {HTMLCanvasElement}
 	 */
@@ -17,16 +23,6 @@
 	 * @type {Chart | undefined}
 	 */
 	let chart;
-
-	export function downloadChart() {
-		if (chart) {
-			var a = document.createElement('a');
-			a.href = chart.toBase64Image();
-			a.download = 'chart_' + canvasElId + '.png';
-			// Trigger the download
-			a.click();
-		}
-	}
 
 	function setCanvas() {
 		canvas?.remove();
@@ -57,7 +53,7 @@
 				datasets: []
 			}
 		};
-		if (table && jsText) {
+		if ($table && jsText) {
 			const getCfg = new Function("table", "return " + $jsText);
 			//alternative with shadow root: setConfig();
 			cfg = getCfg($table);
@@ -76,16 +72,22 @@
 	}
 
 	onMount(async () => {
+		dataName.subscribe((/** @type {string} */ name) => {
+			table = getCachedTable(name);
+			setChart();
+		});
+		jsText.subscribe(() => {
+			setChart();
+		});
 		Chart.register(...registerables);
 		//setChart();
 	});
-	$effect(() => {
-		setChart();
-	});
+	// $effect(() => {
+	// 	setChart();
+	// });
 </script>
 
 <div
 	id={chartViewElementId}
-	class="mt-2 min-h-96 rounded-lg border-2 border-dotted border-pink-200 p-2"
-	style="position: relative;"
+	class="mt-2 min-w-96 rounded-lg border-2 border-dotted p-2 relative bg-secondary/10 border-secondary"
 ></div>
