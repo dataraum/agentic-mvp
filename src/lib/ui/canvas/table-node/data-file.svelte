@@ -1,7 +1,7 @@
 <script>
 	import { Handle, Position, useNodeConnections } from '@xyflow/svelte';
 	import { onMount } from 'svelte';
-	import { updateDataName } from "$lib/persist/surreal";
+	import { updateDataName } from '$lib/persist/surreal';
 	import { deleteDataNode } from '$lib/ui/canvas/index.svelte';
 	import { registerDataTable, unregisterDataTable } from '$lib/processor/datafusion/cf-table-api';
 	import TableView from '$lib/ui/view/table-view.svelte';

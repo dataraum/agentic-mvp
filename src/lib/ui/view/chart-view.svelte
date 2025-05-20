@@ -76,7 +76,6 @@
 
 	onMount(async () => {
 		dataName.subscribe((/** @type {string} */ name) => {
-			console.log('dataName', name);
 			table = getCachedTable(name);
 			setChart($jsText);
 		});

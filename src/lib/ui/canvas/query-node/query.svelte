@@ -105,9 +105,7 @@
 	{/if}
 </div>
 <SqlEditor {sqlText} dataName={data.dataName} dataId={id} />
-
-	<TableView dataName={data.dataName} />
-
+<TableView dataName={data.dataName} />
 <div class="mt-2 flex flex-row items-center justify-center">
 	<div class="tooltip tooltip-secondary tooltip-left" data-tip="Add Chart">
 		<button

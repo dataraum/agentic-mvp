@@ -37,20 +37,22 @@
 		</div>
 		<span class="text-sm font-semibold">Data Chart</span>
 	</div>
-		<ChartView {jsText} {dataName} />
-
+	<ChartView {jsText} {dataName} />
 	<div class="bg-secondary/10 border-secondary rounded-box collapse mt-4 border">
 		<input type="checkbox" />
 		<div class="collapse-title font-semibold"><span>Edit the chart configuration.</span></div>
 		<div class="collapse-content text-sm">
 			<JsEditor {jsText} />
-			<div role="alert" class="alert alert-info mt-6 alert-soft">
+			<div role="alert" class="alert alert-info alert-soft mt-6">
 				<nobr
-					><span class="icon-[ph--info-fill] h-4 w-4 mr-2"></span><span>A
-					<a class="link" href="https://www.chartjs.org/docs/latest/" target="_blank">Chart.js</a>
-					configuration, using the underlying data from an
-					<a class="link" href="https://arrow.apache.org/docs/js" target="_blank">Arrow table</a
-					>.</span>
+					><span class="icon-[ph--info-fill] mr-2 h-4 w-4"></span><span
+						>A
+						<a class="link" href="https://www.chartjs.org/docs/latest/" target="_blank">Chart.js</a>
+						configuration, using the underlying data from an
+						<a class="link" href="https://arrow.apache.org/docs/js" target="_blank">Arrow table</a
+						>.</span
+					>
+				</nobr>
 			</div>
 		</div>
 	</div>
