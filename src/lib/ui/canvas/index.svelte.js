@@ -197,7 +197,7 @@ export async function initFlow() {
 	resetGraph();
 	const allData = await getDataGraph();
 	if (!allData || allData.data.length === 0 && allData.queries.length === 0 && allData.import.length === 0) {
-		//showDataUpload.set(true);
+		showFileSelect();
 		return;
 	}
 	for (const dataset of allData.data) {
@@ -217,5 +217,12 @@ export async function initFlow() {
 	}
 	for (const edge of allData.import) {
 		addEdge(edge.in.id.toString(), edge.out.id.toString(), 'import');
+	}
+}
+export function showFileSelect() {
+	const fileSelect = document.querySelector('#file-select-modal');
+	if (fileSelect) {
+		// @ts-ignore
+		fileSelect.showModal();
 	}
 }

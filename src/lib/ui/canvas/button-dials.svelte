@@ -1,13 +1,7 @@
 <script>
 	import { Panel } from '@xyflow/svelte';
-	import { addQueryNode } from '$lib/ui/canvas/index.svelte';
-	function showFileSelect() {
-		const fileSelect = document.querySelector('#file-select-modal');
-		if (fileSelect) {
-			// @ts-ignore
-			fileSelect.showModal();
-		}
-	}
+	import { addQueryNode, showFileSelect } from '$lib/ui/canvas/index.svelte';
+
 </script>
 
 <Panel position="top-right" style="width: 6%;">

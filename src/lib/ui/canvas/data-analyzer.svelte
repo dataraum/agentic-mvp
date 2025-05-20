@@ -6,7 +6,7 @@
 	import { resetGraph, getNodes, setNodes, getEdges, setEdges } from '$lib/ui/canvas/index.svelte';
 	import '@xyflow/svelte/dist/style.css';
 	import ErrorView from '../view/error-view.svelte';
-		import { deleteItAll } from "$lib/persist/surreal";
+	import { deleteItAll } from '$lib/persist/surreal';
 	import { updatePosition } from '$lib/persist/surreal';
 	import ButtonDials from './button-dials.svelte';
 	import Chart from './chart-node/chart.svelte';
@@ -15,7 +15,7 @@
 	const nodeTypes = {
 		dataNode: DataFile,
 		queryNode: Query,
-		chartNode: Chart,
+		chartNode: Chart
 	};
 
 	let zoomOnScroll = true;
@@ -61,15 +61,13 @@
 	}
 
 	async function resetLocalData() {
-		await navigator.storage
-			.getDirectory()
-			.then((opfsRoot) => opfsRoot.removeEntry('data', { recursive: true }))
-			.then(() =>
-				deleteItAll().then(() => {
-					resetGraph();
-					window.location.reload();
-				})
-			);
+		resetGraph();
+		await deleteItAll().then(() => {
+			navigator.storage
+				.getDirectory()
+				.then((opfsRoot) => opfsRoot.removeEntry('data', { recursive: true }))
+				.then(() => window.location.reload());
+		});
 	}
 
 	/**
@@ -114,8 +112,8 @@
 		{zoomOnScroll}
 		preventScrolling={false}
 		onnodedragstop={(e) => persistNodePositionAfterDrag(e)}
-		onnodepointerenter={() => zoomOnScroll = false}
-		onnodepointerleave={() => zoomOnScroll = true}
+		onnodepointerenter={() => (zoomOnScroll = false)}
+		onnodepointerleave={() => (zoomOnScroll = true)}
 	>
 		<ButtonDials />
 		<ErrorView />
