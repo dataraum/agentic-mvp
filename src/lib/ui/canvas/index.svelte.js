@@ -1,4 +1,4 @@
-import { deleteQueryToDataImport, addDataQueryEdge, storeQueryFile } from '$lib/persist/surreal/queries-api';
+import { deleteQueryToDataImport, addDataQueryEdge, storeQueryFile, getQueryName } from '$lib/persist/surreal/queries-api';
 import { deleteAllDataToQuery } from '$lib/persist/surreal/data-api';
 import { deleteDataTable, registerDataTable } from "$lib/processor/datafusion/cf-table-api";
 import { getTables } from '$lib/processor/datafusion/cf-query-api';
@@ -111,8 +111,11 @@ export function addDataNode(dataset) {
  * @param {string} queryId
  */
 export async function addChartNode(queryId) {
-	let data = { ...DEFAULT_CHART_NODE, chartName: randomName('', '_'), queryId: queryId };
-	await storeChartConfig(data).then((id) => {
+	let data = { ...DEFAULT_CHART_NODE, 
+		chartName: randomName('', '_'), 
+		queryId: queryId, 
+		queryName: await getQueryName(queryId) };
+	await storeChartConfig(data).then(async (id) => {
 		data = { ...data, id: id };
 		updateNodeStore(CHART_NODE_TYPE, data);
 		addEdge(data.queryId, data.id, 'import');

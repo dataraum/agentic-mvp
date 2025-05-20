@@ -9,7 +9,9 @@ const tableCache = new Map();
  */
 export async function setTableCache(name, statement) {
     const table = statement ? await runSql(statement) : undefined;
+    console.log("setTableCache", name, statement, table);
     if (tableCache.has(name)) {
+    console.log("setTableCache 2", name, statement, table);
         tableCache.get(name).set(table);
     } else {
         tableCache.set(name, writable(table));

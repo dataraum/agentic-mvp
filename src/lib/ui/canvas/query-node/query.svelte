@@ -43,8 +43,10 @@
 	});
 
 	onMount(async () => {
+		console.log('data', data);
 		dataName = data.dataName;
 		dataUnsubscribe = sqlText.subscribe((sqlt) => {
+			console.log('sqlt', sqlt);
 			if (data.statement !== sqlt) {
 				data.statement = sqlt;
 				updateQueryStatement(data.id, data.statement);

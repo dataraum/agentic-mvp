@@ -36,6 +36,7 @@
 /**
  * @typedef ChartNodeBody
  * @property {string} queryId
+ * @property {string} queryName
  * @property {string} chartConfig
  * @property {string} chartName
  * @property {{x: number, y: number}} position

@@ -4,6 +4,7 @@ import { surrealDb } from ".";
 export async function storeChartConfig(queryData: ChartNode) {
     const result = await surrealDb.insert<ChartNodeBody>('charts', {
         queryId: queryData.queryId,
+        queryName: queryData.queryName,
         chartConfig: queryData.chartConfig,
         chartName: queryData.chartName,
         position: queryData.position

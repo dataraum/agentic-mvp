@@ -68,6 +68,7 @@ export async function getDataGraph(): Promise<any> {
 					retResult.charts.push({
 						id: chartEntry.id.id.toString(),
 						queryId: chartEntry.queryId,
+						queryName: chartEntry.queryName,
 						chartName: chartEntry.chartName,
 						chartConfig: chartEntry.chartConfig,
 						position: chartEntry.position

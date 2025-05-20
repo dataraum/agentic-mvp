@@ -5,16 +5,13 @@
 	import { writable } from 'svelte/store';
 	import { deleteChartNode } from '../index.svelte';
 	import { onMount } from 'svelte';
-	import { getQueryName } from '$lib/persist/surreal/queries-api';
 	import { updateChartConfig } from '$lib/persist/surreal/chart-api';
 
 	let { data, id } = $props();
-	let dataName = writable();
 
 	let jsText = writable(data.chartConfig);
 
 	onMount(async () => {
-		dataName.set(await getQueryName(data.queryId));
 		jsText.subscribe((js) => {
 			if (data.chartConfig !== js) {
 				data.chartConfig = js;
@@ -37,7 +34,7 @@
 		</div>
 		<span class="text-sm font-semibold">Data Chart</span>
 	</div>
-	<ChartView {jsText} {dataName} />
+	<ChartView {jsText} queryName={data.queryName} />
 	<div class="bg-secondary/10 border-secondary rounded-box collapse mt-4 border">
 		<input type="checkbox" />
 		<div class="collapse-title font-semibold"><span>Edit the chart configuration.</span></div>

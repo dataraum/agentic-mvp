@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { getCachedTable } from '../datasets.svelte';
 
-	let { jsText, dataName } = $props();
+	let { jsText, queryName } = $props();
 
 	let chartViewElementId = window ? window.crypto.randomUUID() : '';
 	let canvasElId = window ? window.crypto.randomUUID() : '';
@@ -39,14 +39,11 @@
 		const host = document.getElementById(chartViewElementId);
 		const shadow = host?.shadowRoot || host?.attachShadow({ mode: 'open' });
 		config = document.createElement('script');
-		config.textContent = "function getCfg(table){return " + $jsText + ";}";
+		config.textContent = 'function getCfg(table){return ' + $jsText + ';}';
 		shadow?.appendChild(config);
 	}
 
-	/**
-	 * @param {string} config
-	 */
-	function setChart(config) {
+	function setChart() {
 		chart?.destroy();
 		setCanvas();
 		let cfg = {
@@ -56,8 +53,8 @@
 				datasets: []
 			}
 		};
-		if ($table && config) {
-			const getCfg = new Function("table", "return " + config);
+		if ($table && $jsText) {
+			const getCfg = new Function('table', 'return ' + $jsText);
 			//alternative with shadow root: setConfig();
 			cfg = getCfg($table);
 		}
@@ -75,23 +72,19 @@
 	}
 
 	onMount(async () => {
-		dataName.subscribe((/** @type {string} */ name) => {
-			table = getCachedTable(name);
-			setChart($jsText);
-		});
-		jsText.subscribe((/** @type {string} */ jst) => {
-			setChart(jst);
-		});
-		table.subscribe((/** @type {any} */ tbl) => {
-			if (tbl) {
-				setChart($jsText);
-			}
-		});
+		console.log('chartView', queryName);
 		Chart.register(...registerables);
+		table = getCachedTable(queryName);
+	});
+
+	$effect(() => {
+		if (table && jsText) {
+			setChart();
+		}
 	});
 </script>
 
 <div
 	id={chartViewElementId}
-	class="mt-4 min-w-96 rounded-lg border-2 border-dotted p-2 relative bg-secondary/10 border-secondary"
+	class="bg-secondary/10 border-secondary relative mt-4 min-h-96 rounded-lg border-2 border-dotted p-2"
 ></div>
