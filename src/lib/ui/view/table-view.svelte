@@ -12,7 +12,7 @@
 </script>
 
 {#if $table}
-	<div class="h-48 w-96 bg-secondary/30 rounded-sm p-0.5" style="overflow-x:auto;">
+	<div class="h-48 w-96 bg-secondary/30 border-secondary/40 rounded-sm border p-1 mt-4" style="overflow-x:auto;">
 		<table class="table-xs table-pin-rows table-pin-cols table">
 			<thead>
 				<tr>

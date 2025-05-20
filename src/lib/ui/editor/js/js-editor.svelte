@@ -5,7 +5,7 @@
 	import { javascript } from '@codemirror/lang-javascript';
 	import { defaultKeymap } from '@codemirror/commands';
 
-	let {jsText} = $props();
+	let { jsText } = $props();
 
 	let jsEditorElementId = window ? window.crypto.randomUUID() : '';
 
@@ -40,4 +40,6 @@
 	});
 </script>
 
-<div id={jsEditorElementId}></div>
+<div class="bg-secondary/10 border-secondary rounded-box collapse border">
+	<div id={jsEditorElementId}></div>
+</div>

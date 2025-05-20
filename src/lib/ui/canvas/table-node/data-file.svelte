@@ -11,7 +11,6 @@
 
 	const connections = useNodeConnections();
 
-	//let table = writable();
 	let dataName = $state();
 	let editName = $state(false);
 
@@ -80,7 +79,5 @@
 		</div>
 	{/if}
 </div>
-<div class="mt-4 mb-1">
-	<TableView dataName={data.dataName} />
-</div>
+<TableView dataName={data.dataName} />
 <Handle type="source" position={Position.Bottom} />

@@ -104,12 +104,10 @@
 		</div>
 	{/if}
 </div>
-<div class="bg-secondary/30 mt-4 rounded-sm p-1">
-	<SqlEditor {sqlText} dataName={data.dataName} dataId={id} />
-</div>
-<div class="mt-4 mb-1">
+<SqlEditor {sqlText} dataName={data.dataName} dataId={id} />
+
 	<TableView dataName={data.dataName} />
-</div>
+
 <div class="mt-2 flex flex-row items-center justify-center">
 	<div class="tooltip tooltip-secondary tooltip-left" data-tip="Add Chart">
 		<button

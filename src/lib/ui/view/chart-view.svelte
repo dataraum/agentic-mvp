@@ -43,7 +43,10 @@
 		shadow?.appendChild(config);
 	}
 
-	function setChart() {
+	/**
+	 * @param {string} config
+	 */
+	function setChart(config) {
 		chart?.destroy();
 		setCanvas();
 		let cfg = {
@@ -53,8 +56,8 @@
 				datasets: []
 			}
 		};
-		if ($table && $jsText) {
-			const getCfg = new Function("table", "return " + $jsText);
+		if ($table && config) {
+			const getCfg = new Function("table", "return " + config);
 			//alternative with shadow root: setConfig();
 			cfg = getCfg($table);
 		}
@@ -73,21 +76,23 @@
 
 	onMount(async () => {
 		dataName.subscribe((/** @type {string} */ name) => {
+			console.log('dataName', name);
 			table = getCachedTable(name);
-			setChart();
+			setChart($jsText);
 		});
-		jsText.subscribe(() => {
-			setChart();
+		jsText.subscribe((/** @type {string} */ jst) => {
+			setChart(jst);
+		});
+		table.subscribe((/** @type {any} */ tbl) => {
+			if (tbl) {
+				setChart($jsText);
+			}
 		});
 		Chart.register(...registerables);
-		//setChart();
 	});
-	// $effect(() => {
-	// 	setChart();
-	// });
 </script>
 
 <div
 	id={chartViewElementId}
-	class="mt-2 min-w-96 rounded-lg border-2 border-dotted p-2 relative bg-secondary/10 border-secondary"
+	class="mt-4 min-w-96 rounded-lg border-2 border-dotted p-2 relative bg-secondary/10 border-secondary"
 ></div>
