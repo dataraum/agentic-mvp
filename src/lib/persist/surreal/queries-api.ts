@@ -1,23 +1,14 @@
 import { RecordId } from "surrealdb";
-import { surrealDb, type GeneralResult, type QueryNodeRecord } from ".";
+import { surrealDb } from ".";
 
 export async function deleteQueryToDataImport(queryId: string) {
 	const queryString = 'DELETE queries:' + queryId + '->connected;';
 	surrealDb.query(queryString);
 }
 
-export async function addEdge(sourceId: string, targetId: string): Promise<string> {
-	const result = await surrealDb.query<GeneralResult[][]>(
-		'SELECT id FROM queries WHERE dataId = $sourceId;',
-		{ sourceId }
-	);
-	if (result && result[0] && result[0][0]) {
-		sourceId = result[0][0].id.id.toString();
-	}
+export async function addEdge(sourceId: string, targetId: string): Promise<void> {
 	const queryString = 'RELATE data:' + sourceId + '->connected->queries:' + targetId + ';';
 	surrealDb.query(queryString);
-
-	return sourceId;
 }
 export async function deleteItAll() {
 	surrealDb.query('REMOVE DATABASE proto;');
@@ -26,31 +17,18 @@ export async function deleteItAll() {
 export async function storeQueryFile(queryData: QueryNode) {
 	const result = await surrealDb.insert<QueryNodeBody>('queries', {
 		dataName: queryData.dataName,
-		dataId: queryData.dataId,
 		format: queryData.format,
 		statement: queryData.statement,
-		chartConfig: queryData.chartConfig,
-		nodeView: queryData.nodeView,
 		position: queryData.position
 	});
 	return result[0].id.id.toString();
 }
 
-export async function updateQueryFile(queryData: QueryNode) {
-	if (!queryData.id) {
-		throw new Error('Query file ID is required');
-	}
+export async function updateQueryStatement(id: string, statement: string) {
 	surrealDb.merge(
-		new RecordId('queries', queryData.id),
+		new RecordId('queries', id),
 		{
-			statement: queryData.statement,
-			chartConfig: queryData.chartConfig,
-			nodeView: queryData.nodeView,
+			statement: statement,
 		});
 }
 
-export async function linkQueryToDataFile(queryId: string, dataId: string) {
-	surrealDb.merge<QueryNodeRecord>(new RecordId('queries', queryId), {
-		dataId: dataId,
-	});
-}

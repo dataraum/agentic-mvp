@@ -48,7 +48,6 @@ export async function getDataGraph(): Promise<any> {
 						dataName: dataEntry.dataName,
 						format: dataEntry.format,
 						size: dataEntry.size,
-						nodeView: dataEntry.nodeView,
 						position: dataEntry.position,
 					});
 					break;
@@ -57,11 +56,8 @@ export async function getDataGraph(): Promise<any> {
 					retResult.queries.push({
 						id: queryEntry.id.id.toString(),
 						dataName: queryEntry.dataName,
-						dataId: queryEntry.dataId,
 						format: queryEntry.format,
 						statement: queryEntry.statement,
-						chartConfig: queryEntry.chartConfig,
-						nodeView: queryEntry.nodeView,
 						position: queryEntry.position
 					});
 					break;
@@ -87,4 +83,11 @@ export async function updatePosition(table: string, position: { x: number; y: nu
 
 export async function deleteNodeRecord(table: string, dataId: string) {
 	surrealDb.delete(new RecordId(table, dataId));
+}
+
+export async function updateDataName(table: string, id: string, dataName: string) {
+	surrealDb.merge<DataNodeRecord>(
+		new RecordId(table, id), {
+		dataName: dataName
+	});
 }

@@ -4,18 +4,33 @@
 	import { EditorView, keymap } from '@codemirror/view';
 	import { sql } from '@codemirror/lang-sql';
 	import { Compartment } from '@codemirror/state';
-	import { schemas } from '../../datasets.svelte';
+	import { schemas, setTableCache } from '../../datasets.svelte';
 	import { defaultKeymap } from '@codemirror/commands';
+	import { storePersistedQuery } from '$lib/processor/datafusion/cf-query-api';
 
-	let { sqlText, sqlEditorElementId } = $props();
+	let { sqlText, dataName, dataId } = $props();
+	let sqlEditorElementId = window ? window.crypto.randomUUID() : '';
+	/**
+	 * @type {string}
+	 */
+	let editedText;
+
+	function saveSql() {
+		storePersistedQuery(editedText, dataName, dataId)
+			.then(() => setTableCache(dataName, editedText))
+			.then(() => sqlText.set(editedText))
+			.catch((err) => console.error('Error saving SQL:', err));
+		return true;
+	}
 
 	onMount(async () => {
+		editedText = $sqlText;
 		const targetElement = document.getElementById(sqlEditorElementId);
 		if (!targetElement) return;
 
 		const comp = new Compartment();
 		const editor = new EditorView({
-			doc: $sqlText,
+			doc: editedText,
 			extensions: [
 				basicSetup,
 				comp.of(
@@ -25,7 +40,7 @@
 				),
 				EditorView.updateListener.of((update) => {
 					if (update.docChanged) {
-						$sqlText = update.state.doc.toString();
+						editedText = update.state.doc.toString();
 					}
 				}),
 				keymap.of([...defaultKeymap, { key: 'Ctrl-s', mac: 'Cmd-s', run: saveSql }])

@@ -1,21 +1,14 @@
 <script>
-	import {
-		SvelteFlow,
-		Background,
-		Controls,
-		MiniMap,
-		ControlButton
-	} from '@xyflow/svelte';
+	import { SvelteFlow, Background, Controls, MiniMap, ControlButton } from '@xyflow/svelte';
 	import Dagre from '@dagrejs/dagre';
 	import DataFile from '$lib/ui/canvas/table-node/data-file.svelte';
 	import Query from '$lib/ui/canvas/query-node/query.svelte';
 	import { resetGraph, getNodes, setNodes, getEdges, setEdges } from '$lib/ui/canvas/index.svelte';
-	import { CloseCircleSolid, ExpandOutline, TrashBinOutline } from 'flowbite-svelte-icons';
 	import '@xyflow/svelte/dist/style.css';
-	import ErrorView from '../view/error-view.svelte';
-	import ButtonDials from './button-dials.svelte';
+	//import ErrorView from '../view/error-view.svelte';
 	import { deleteItAll } from '$lib/persist/surreal/queries-api';
 	import { updatePosition } from '$lib/persist/surreal';
+	import ButtonDials from './button-dials.svelte';
 
 	/** @type {import('@xyflow/svelte').NodeTypes} */
 	const nodeTypes = {
@@ -24,6 +17,8 @@
 		// @ts-ignore
 		queryNode: Query
 	};
+
+	let zoomOnScroll = true;
 
 	function doLayout() {
 		const dagreGraph = new Dagre.graphlib.Graph();
@@ -113,17 +108,21 @@
 		bind:nodes={getNodes, setNodes}
 		bind:edges={getEdges, setEdges}
 		{nodeTypes}
+		{zoomOnScroll}
+		preventScrolling={false}
 		onnodedragstop={(e) => persistNodePositionAfterDrag(e)}
+		onnodepointerenter={() => zoomOnScroll = false}
+		onnodepointerleave={() => zoomOnScroll = true}
 	>
-		<!--ButtonDials /-->
-		<ErrorView />
+		<ButtonDials />
+		<!--ErrorView /-->
 		<Background />
 		<Controls>
 			<ControlButton title="shuffle layout" onclick={() => doLayout()}>
-				<ExpandOutline />
+				<span class="icon-[ph--arrows-in]"></span>
 			</ControlButton>
 			<ControlButton title="reset everything" onclick={() => resetLocalData()}>
-				<TrashBinOutline />
+				<span class="icon-[ph--trash-fill]"></span>
 			</ControlButton>
 			<!--ControlButton title="logout" onclick={() => (location.pathname = '/logout')}>
 				<CloseCircleSolid />

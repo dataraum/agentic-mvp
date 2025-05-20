@@ -1,7 +1,7 @@
 <script>
 	import { Panel } from '@xyflow/svelte';
-	import { Alert } from 'flowbite-svelte';
-	import { BullhornOutline, CloseCircleOutline } from 'flowbite-svelte-icons';
+	// import { Alert } from 'flowbite-svelte';
+	// import { BullhornOutline, CloseCircleOutline } from 'flowbite-svelte-icons';
 	import { errorView } from '$lib/ui/errorUtils';
 </script>
 

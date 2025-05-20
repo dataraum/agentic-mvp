@@ -1,9 +1,10 @@
 import { deleteQueryToDataImport, addEdge, storeQueryFile } from '$lib/persist/surreal/queries-api';
 import { deleteAllDataToQuery } from '$lib/persist/surreal/data-api';
 import { deleteDataTable, registerDataTable } from "$lib/processor/datafusion/cf-table-api";
-import { getTables, unpersistedQueryNode } from '$lib/processor/datafusion/cf-query-api';
-import { showDataUpload } from '../data-import';
+import { getTables } from '$lib/processor/datafusion/cf-query-api';
 import { deleteNodeRecord, getDataGraph } from '$lib/persist/surreal';
+import randomName from '@scaleway/random-name';
+import { setTableCache } from '../datasets.svelte';
 
 export const DATA_NODE_TYPE = 'dataNode';
 export const QUERY_NODE_TYPE = 'queryNode';
@@ -23,8 +24,7 @@ const DEFAULT_CHART_CFG = `{
 const DEFAULT_QUERY_NODE = {
 	id: '',
 	format: 'df/sql',
-	chartConfig: DEFAULT_CHART_CFG,
-	nodeView: -1,
+	dataName: '',
 	position: { x: 480, y: 50 },
 };
 
@@ -67,14 +67,6 @@ function updateNodeStore(nodeType, data) {
 	nodes = [...nodes];
 }
 /**
- * @param {DataNode} nodeData
- */
-export async function addDataNode(nodeData) {
-	if (nodeData.position) {
-		updateNodeStore(DATA_NODE_TYPE, nodeData);
-	}
-}
-/**
  * @param {string} nodeId 
  * @param {string} dataName 
  */
@@ -90,23 +82,30 @@ export function deleteDataNode(nodeId, dataName) {
 		.then(() => deleteDataTable(nodeId, dataName));
 }
 export async function addQueryNode() {
-	await storeQueryFile(DEFAULT_QUERY_NODE).then((id) => {
-		const data = { ...DEFAULT_QUERY_NODE, id: id };
+	let data = { ...DEFAULT_QUERY_NODE, dataName: randomName('', '_') };
+	await storeQueryFile(data).then((id) => {
+		setTableCache(data.dataName, undefined);
+		data = { ...data, id: id};
 		updateNodeStore(QUERY_NODE_TYPE, data);
 	});
 }
 /**
- * @param {QueryNode} data 
+ * @param {DataNode | QueryNode} dataset
  */
-export function deleteQueryNode(data) {
-	unpersistedQueryNode(data, data.dataId ?? '', data.dataName ?? '')
-		.then(() => deleteNodeRecord('queries', data.id))
-		.then(() => deleteNode(data.id))
-		.then(() => deleteQueryToDataImport(data.id))
+export function addDataNode(dataset) {
+	updateNodeStore(DATA_NODE_TYPE, dataset);
+}
+/**
+ * @param {string} id 
+ */
+export function deleteQueryNode(id) {
+	deleteNodeRecord('queries', id)
+		.then(() => deleteNode(id))
+		.then(() => deleteQueryToDataImport(id))
 		.then(() => {
 			edges = edges.reduce(
 				(/** @type {import("@xyflow/svelte").Edge[]} */p, c) => (
-					c.target !== data.id && p.push(c), p), []);
+					c.target !== id && p.push(c), p), []);
 		});
 }
 /**
@@ -125,8 +124,8 @@ export async function resetImportEdges(id, query) {
 		})
 		.then(async () => {
 			(await getTables(query)).forEach((tableId) =>
-				addEdge(tableId, id).then((sourceId) => 
-					addQueryDataEdge(sourceId, id, 'import')
+				addEdge(tableId, id).then(() =>
+					addQueryDataEdge(tableId, id, 'import')
 				)
 			);
 		});
@@ -163,21 +162,19 @@ export async function initFlow() {
 	resetGraph();
 	const allData = await getDataGraph();
 	if (!allData || allData.data.length === 0 && allData.queries.length === 0 && allData.import.length === 0) {
-		showDataUpload.set(true);
+		//showDataUpload.set(true);
 		return;
 	}
-	const datasets = new Map();
 	for (const dataset of allData.data) {
-		// @ts-ignore
-		await registerDataTable(dataset.id, dataset.dataName).then(() => addDataNode(dataset));
-		datasets.set(dataset.id, dataset.dataName);
+		await registerDataTable(dataset.id, dataset.dataName);
+		const statement = "SELECT * FROM '" + dataset.dataName + "'";
+		await setTableCache(dataset.dataName, statement);
+		addDataNode(dataset);
 	}
 	for (const query of allData.queries) {
-		if (query.dataId) {
-			const dataName = datasets.get(query.dataId);
-			// @ts-ignore
-			await registerDataTable(query.id, dataName);
-			query.dataName = dataName;
+		if (query.statement) {
+			await registerDataTable(query.id, query.dataName);
+			await setTableCache(query.dataName, query.statement);
 		}
 		updateNodeStore(QUERY_NODE_TYPE, query);
 	}

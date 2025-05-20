@@ -1,24 +1,10 @@
-import { linkQueryToDataFile } from "$lib/persist/surreal/queries-api";
 import { setErrorView } from "$lib/ui/errorUtils";
 import { persist_sql, register_table, get_table_schema, run_sql } from "proto-query-engine";
-import { deleteDataTable, unregisterDataTable, registerDataTable } from "./cf-table-api";
-import { addSchema, deleteSchema, updateSchema } from "$lib/ui/datasets.svelte";
+import { unregisterDataTable, registerDataTable } from "./cf-table-api";
+import { addSchema } from "$lib/ui/datasets.svelte";
 import { Table, tableFromIPC } from "@apache-arrow/ts";
-import { storeDataFile, updateDataName } from "$lib/persist/surreal/data-api";
-import { deleteNodeRecord } from "$lib/persist/surreal";
+import { updateDataName } from "$lib/persist/surreal";
 
-/**
- * @param {QueryNode} nodeData
- * @param {string} tableId
- * @param {string} dataName
- */
-export async function unpersistedQueryNode(nodeData, tableId, dataName) {
-    deleteSchema(dataName);
-    return deleteNodeRecord('data', tableId)
-        // @ts-ignore
-        .then(() => linkQueryToDataFile(nodeData.id, ""))
-        .then(() => deleteDataTable(tableId, dataName));
-}
 /**
  * @param {string} newDataName
  * @param {QueryNode} data
@@ -26,35 +12,23 @@ export async function unpersistedQueryNode(nodeData, tableId, dataName) {
 export async function changePersistedQueryName(newDataName, data) {
     await unregisterDataTable(data.dataName ?? '')
         .then(() => registerDataTable(data.id ?? '', newDataName))
-        .then((/**@type{any}*/ schema) => updateSchema(data.dataName ?? '', schema))
-        .then(() => updateDataName(data.dataId ?? '', newDataName));
+        //.then((/**@type{any}*/ schema) => updateSchema(data.dataName ?? '', schema))
+        .then(() => updateDataName('queries', data.id ?? '', newDataName));
 }
 /**
  * @param {string} sqlStatement
  * @param {string} dataName
  * @param {string} queryId
- * @returns {Promise<string>}
+ * @returns {Promise<void>}
  */
-export async function addPersistedQuery(sqlStatement, dataName, queryId) {
-    // query tables are registered under the query id and not the data digest
-    const dataFile = {
-        id: '',
-        dataName: dataName,
-        format: 'df/ipc',
-        position: { x: 0, y: 0 },
-    };
-    const result = await storeDataFile(dataFile);
-    const dataId = result.id ? result.id : "";
-
-    await persist_sql(sqlStatement, dataId)
-        .then(() => register_table(dataId, dataName))
+export async function storePersistedQuery(sqlStatement, dataName, queryId) {
+    await persist_sql(sqlStatement, queryId)
+        .then(() => register_table(queryId, dataName))
         .then(() => get_table_schema(dataName))
         .then((/** @type {string} */ schema) => addSchema(JSON.parse(schema)))
-        .then(() => linkQueryToDataFile(queryId, dataId))
         .catch((/** @type {Error} */ e) => {
             setErrorView(e.message);
         });
-    return dataId;
 }
 /**
  *

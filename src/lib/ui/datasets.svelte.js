@@ -1,10 +1,41 @@
+import { runSql } from "$lib/processor/datafusion/cf-query-api";
 import { writable } from "svelte/store";
 
-const datasets = new Map();
+const tableCache = new Map();
 
-export const setData = (/** @type {string} */ name, /** @type {import ("@apache-arrow/ts").Table} */ data) => datasets.set(name, data);
+/**
+ * @param {string} name
+ * @param {string | undefined} statement
+ */
+export async function setTableCache(name, statement) {
+    const table = statement ? await runSql(statement) : undefined;
+    if (tableCache.has(name)) {
+        tableCache.get(name).set(table);
+    } else {
+        tableCache.set(name, writable(table));
+    }
+}
 
-export const getData = (/** @type {string} */ name) => datasets.get(name);
+/**
+ * @param {string} name
+ * @returns {import("svelte/store").Writable<any>}
+ */
+export function getCachedTable(name) {
+    const table = tableCache.get(name);
+    return table ? table : writable(null);
+}
+
+/**
+ * @param {string} name
+ * @param {string} newName
+ */
+export function updateCachedTableName(name, newName) {
+    const table = tableCache.get(name);
+    if (table) {
+        tableCache.set(newName, table);
+        tableCache.delete(name);
+    }
+}
 
 /** @type {import("svelte/store").Writable<any>} */
 export const schemas = writable({});

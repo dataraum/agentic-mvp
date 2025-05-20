@@ -7,7 +7,6 @@
  * @property {string} dataName
  * @property {number} [size]
  * @property {string} format
- * @property {number} [nodeView]
  * @property {{x: number, y: number}} position
  * @memberof tocqdefs
  */
@@ -24,17 +23,26 @@
 /**
  * @typedef QueryNodeBody
  * @property {string} [statement]
- * @property {string} chartConfig
- * @property {string} [dataId]
- * @property {string} [dataName]
+ * @property {string} dataName
  * @property {string} format
- * @property {number} nodeView
  * @property {{x: number, y: number}} position
  * @memberof tocqdefs
  */
 
 /**
  * @typedef {BaseNode & QueryNodeBody} QueryNode
+ */
+
+/**
+ * @typedef ChartNodeBody
+ * @property {string} chartConfig
+ * @property {string} chartName
+ * @property {{x: number, y: number}} position
+ * @memberof tocqdefs
+ */
+
+/**
+ * @typedef {BaseNode & ChartNodeBody} ChartNode
  */
 
 /**
