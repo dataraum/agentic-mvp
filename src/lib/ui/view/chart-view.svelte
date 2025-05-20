@@ -53,7 +53,7 @@
 				datasets: []
 			}
 		};
-		if ($table && jsText) {
+		if ($table && $jsText) {
 			const getCfg = new Function("table", "return " + $jsText);
 			//alternative with shadow root: setConfig();
 			cfg = getCfg($table);
