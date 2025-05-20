@@ -59,6 +59,6 @@
 	});
 </script>
 
-<div class="bg-secondary/30 border-secondary/40 rounded-box collapse mt-2 border p-1">
+<div class="bg-secondary/30 border-secondary/40 rounded-box mt-2 border p-1">
 	<div id={sqlEditorElementId}></div>
 </div>

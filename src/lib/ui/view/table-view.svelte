@@ -35,5 +35,5 @@
 		</table>
 	</div>
 {:else}
-	<div class="skeleton h-48 w-96"></div>
+	<div class="skeleton h-48 w-96 bg-secondary/30 border-secondary/40 rounded-sm border p-1 mt-4"></div>
 {/if}
