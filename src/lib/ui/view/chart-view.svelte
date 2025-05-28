@@ -72,7 +72,6 @@
 	}
 
 	onMount(async () => {
-		console.log('chartView', queryName);
 		Chart.register(...registerables);
 		table = getCachedTable(queryName);
 	});
